@@ -8,7 +8,7 @@ jobs:
     name: Build and deploy
     runs-on: ubuntu-latest
     env:
-      OWNER: xakpro
+      OWNER: rendau
       REPO: gms_temp
       IMAGE: gms_temp
     steps:
