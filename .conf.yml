@@ -1,6 +1,6 @@
-debug: false
+debug: true
 log_level: "info"
-http_listen: ":80"
+http_listen: ":5050"
 redis:
   url:
   password:
