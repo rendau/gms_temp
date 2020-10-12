@@ -5,3 +5,5 @@ redis:
   url:
   password:
   db: 0
+pg:
+  dsn: postgres://user:pass@host:5432/dbname?sslmode=disable

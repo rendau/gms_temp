@@ -4,6 +4,7 @@ import (
 	"context"
 	memCache "github.com/rendau/gms_temp/internal/adapters/cache/mem"
 	"github.com/rendau/gms_temp/internal/adapters/cache/redis"
+	"github.com/rendau/gms_temp/internal/adapters/db/pg"
 	"github.com/rendau/gms_temp/internal/adapters/httpapi"
 	"github.com/rendau/gms_temp/internal/adapters/logger/zap"
 	"github.com/rendau/gms_temp/internal/domain/core"
@@ -23,13 +24,14 @@ func Execute() {
 	loadConf()
 
 	app := struct {
-		log     *zap.St
+		lg      *zap.St
 		cache   interfaces.Cache
+		db      interfaces.Db
 		core    *core.St
 		restApi *httpapi.St
 	}{}
 
-	app.log, err = zap.New(viper.GetString("log_level"), viper.GetBool("debug"), false)
+	app.lg, err = zap.New(viper.GetString("log_level"), viper.GetBool("debug"), false)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -38,25 +40,31 @@ func Execute() {
 		app.cache = memCache.New()
 	} else {
 		app.cache = redis.NewRedisSt(
-			app.log,
+			app.lg,
 			viper.GetString("redis.url"),
 			viper.GetString("redis.psw"),
 			viper.GetInt("redis.db"),
 		)
 	}
 
+	app.db, err = pg.NewSt(app.lg, viper.GetString("pg.dsn"))
+	if err != nil {
+		app.lg.Fatal(err)
+	}
+
 	app.core = core.New(
-		app.log,
+		app.lg,
 		app.cache,
+		app.db,
 	)
 
 	app.restApi = httpapi.New(
-		app.log,
+		app.lg,
 		viper.GetString("http_listen"),
 		app.core,
 	)
 
-	app.log.Infow(
+	app.lg.Infow(
 		"Starting",
 		"http_listen", viper.GetString("http_listen"),
 	)
@@ -74,14 +82,14 @@ func Execute() {
 		exitCode = 1
 	}
 
-	app.log.Infow("Shutting down...")
+	app.lg.Infow("Shutting down...")
 
 	ctx, ctxCancel := context.WithTimeout(context.Background(), 20*time.Second)
 	defer ctxCancel()
 
 	err = app.restApi.Shutdown(ctx)
 	if err != nil {
-		app.log.Errorw("Fail to shutdown http-api", err)
+		app.lg.Errorw("Fail to shutdown http-api", err)
 		exitCode = 1
 	}
 

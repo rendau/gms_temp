@@ -6,4 +6,5 @@
 release/*
 build/
 conf.yml
+test_conf.yml
 /svc
