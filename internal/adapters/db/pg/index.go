@@ -2,10 +2,14 @@ package pg
 
 import (
 	"context"
-	"database/sql"
+	"github.com/jackc/pgconn"
+	"github.com/jackc/pgx/v4"
+	"github.com/jackc/pgx/v4/pgxpool"
 	_ "github.com/jackc/pgx/v4/stdlib" // driver
-	"github.com/jmoiron/sqlx"
+	"github.com/rendau/gms_temp/internal/domain/errs"
 	"github.com/rendau/gms_temp/internal/interfaces"
+	"strconv"
+	"strings"
 	"time"
 )
 
@@ -15,34 +19,42 @@ const TransactionCtxKey = "pg_transaction"
 type St struct {
 	lg interfaces.Logger
 
-	Db *sqlx.DB
+	Con *pgxpool.Pool
 }
 
 type conSt interface {
-	sqlx.ExtContext
-
-	PrepareNamed(query string) (*sqlx.NamedStmt, error)
-	GetContext(ctx context.Context, dest interface{}, query string, args ...interface{}) error
-	SelectContext(ctx context.Context, dest interface{}, query string, args ...interface{}) error
+	Exec(ctx context.Context, sql string, arguments ...interface{}) (pgconn.CommandTag, error)
+	Query(ctx context.Context, sql string, args ...interface{}) (pgx.Rows, error)
+	QueryRow(ctx context.Context, sql string, args ...interface{}) pgx.Row
 }
 
 type txContainerSt struct {
-	tx *sqlx.Tx
+	tx pgx.Tx
 }
 
 func NewSt(lg interfaces.Logger, dsn string) (*St, error) {
-	db, err := sqlx.Open("pgx", dsn)
+	dbConfig, err := pgxpool.ParseConfig(dsn)
 	if err != nil {
+		lg.Errorw(ErrMsg+": Fail to parse dsn", err)
 		return nil, err
 	}
 
-	db.SetMaxOpenConns(100)
-	db.SetMaxIdleConns(10)
-	db.SetConnMaxLifetime(10 * time.Minute)
+	dbConfig.MaxConns = 30
+	dbConfig.MinConns = 3
+	dbConfig.MaxConnLifetime = 0
+	dbConfig.MaxConnIdleTime = 3 * time.Minute
+	dbConfig.HealthCheckPeriod = 20 * time.Second
+	dbConfig.LazyConnect = true
+
+	dbPool, err := pgxpool.ConnectConfig(context.Background(), dbConfig)
+	if err != nil {
+		lg.Errorw(ErrMsg+": Fail to connect to db", err)
+		return nil, err
+	}
 
 	return &St{
-		lg: lg,
-		Db: db,
+		lg:  lg,
+		Con: dbPool,
 	}, nil
 }
 
@@ -51,7 +63,11 @@ func (d *St) handleError(err error) error {
 		return nil
 	}
 
-	// errStr := err.Error()
+	if err == context.Canceled ||
+		err == context.DeadlineExceeded {
+		d.lg.Infow("PG-error, context canceled")
+		return errs.ServiceNA
+	}
 
 	d.lg.Errorw(ErrMsg, err)
 
@@ -62,7 +78,7 @@ func (d *St) getCon(ctx context.Context) conSt {
 	if tx := d.getContextTransaction(ctx); tx != nil {
 		return tx
 	}
-	return d.Db
+	return d.Con
 }
 
 func (d *St) getContextTransactionContainer(ctx context.Context) *txContainerSt {
@@ -79,7 +95,7 @@ func (d *St) getContextTransactionContainer(ctx context.Context) *txContainerSt 
 	}
 }
 
-func (d *St) getContextTransaction(ctx context.Context) *sqlx.Tx {
+func (d *St) getContextTransaction(ctx context.Context) pgx.Tx {
 	container := d.getContextTransactionContainer(ctx)
 	if container != nil {
 		return container.tx
@@ -89,14 +105,12 @@ func (d *St) getContextTransaction(ctx context.Context) *sqlx.Tx {
 }
 
 func (d *St) ContextWithTransaction(ctx context.Context) (context.Context, error) {
-	tx, err := d.Db.BeginTxx(ctx, nil)
+	tx, err := d.Con.Begin(ctx)
 	if err != nil {
-		return ctx, err
+		return ctx, d.handleError(err)
 	}
 
-	ctx = context.WithValue(ctx, TransactionCtxKey, &txContainerSt{tx: tx})
-
-	return ctx, nil
+	return context.WithValue(ctx, TransactionCtxKey, &txContainerSt{tx: tx}), nil
 }
 
 func (d *St) CommitContextTransaction(ctx context.Context) error {
@@ -105,9 +119,16 @@ func (d *St) CommitContextTransaction(ctx context.Context) error {
 		return nil
 	}
 
-	if err := tx.Commit(); err != nil && err != sql.ErrTxDone && err != context.Canceled {
-		d.lg.Errorw("Fail to commit transaction", err)
-		return err
+	err := tx.Commit(ctx)
+	if err != nil {
+		if err == context.Canceled ||
+			err == context.DeadlineExceeded {
+			return errs.ContextCancelled
+		}
+		if err != pgx.ErrTxClosed &&
+			err != pgx.ErrTxCommitRollback {
+			return d.handleError(err)
+		}
 	}
 
 	return nil
@@ -119,8 +140,16 @@ func (d *St) RollbackContextTransaction(ctx context.Context) {
 		return
 	}
 
-	if err := tx.Rollback(); err != nil && err != sql.ErrTxDone && err != context.Canceled {
-		d.lg.Errorw("Fail to rollback transaction", err)
+	err := tx.Rollback(ctx)
+	if err != nil {
+		if err == context.Canceled ||
+			err == context.DeadlineExceeded {
+			return
+		}
+		if err != pgx.ErrTxClosed &&
+			err != pgx.ErrTxCommitRollback {
+			_ = d.handleError(err)
+		}
 	}
 }
 
@@ -134,20 +163,66 @@ func (d *St) RenewContextTransaction(ctx context.Context) error {
 	}
 
 	if container.tx != nil {
-		err = container.tx.Commit()
-		if err != nil && err != sql.ErrTxDone {
+		err = container.tx.Commit(ctx)
+		if err != nil &&
+			err != pgx.ErrTxClosed &&
+			err != pgx.ErrTxCommitRollback &&
+			err != context.Canceled &&
+			err != context.DeadlineExceeded {
 			// try to rollback
-			_ = container.tx.Rollback()
-
-			d.lg.Errorw("Fail to commit transaction", err)
-			return err
+			_ = container.tx.Rollback(ctx)
+			return d.handleError(err)
 		}
 	}
 
-	container.tx, err = d.Db.BeginTxx(ctx, nil)
+	container.tx, err = d.Con.Begin(ctx)
 	if err != nil {
-		return err
+		return d.handleError(err)
 	}
 
 	return nil
+}
+
+func (d *St) dbExec(ctx context.Context, sql string, args ...interface{}) (pgconn.CommandTag, error) {
+	return d.getCon(ctx).Exec(ctx, sql, args...)
+}
+
+func (d *St) dbQuery(ctx context.Context, sql string, args ...interface{}) (pgx.Rows, error) {
+	return d.getCon(ctx).Query(ctx, sql, args...)
+}
+
+func (d *St) dbQueryRow(ctx context.Context, sql string, args ...interface{}) pgx.Row {
+	return d.getCon(ctx).QueryRow(ctx, sql, args...)
+}
+
+func (d *St) queryRebindNamed(sql string, argMap map[string]interface{}) (string, []interface{}) {
+	resultQuery := sql
+	args := make([]interface{}, 0, len(argMap))
+
+	for k, v := range argMap {
+		if strings.Contains(resultQuery, "${"+k+"}") {
+			args = append(args, v)
+			resultQuery = strings.ReplaceAll(resultQuery, "${"+k+"}", "$"+strconv.Itoa(len(args)))
+		}
+	}
+
+	return resultQuery, args
+}
+
+func (d *St) dbExecM(ctx context.Context, sql string, argMap map[string]interface{}) (pgconn.CommandTag, error) {
+	rbSql, args := d.queryRebindNamed(sql, argMap)
+
+	return d.getCon(ctx).Exec(ctx, rbSql, args...)
+}
+
+func (d *St) dbQueryM(ctx context.Context, sql string, argMap map[string]interface{}) (pgx.Rows, error) {
+	rbSql, args := d.queryRebindNamed(sql, argMap)
+
+	return d.getCon(ctx).Query(ctx, rbSql, args...)
+}
+
+func (d *St) dbQueryRowM(ctx context.Context, sql string, argMap map[string]interface{}) pgx.Row {
+	rbSql, args := d.queryRebindNamed(sql, argMap)
+
+	return d.getCon(ctx).QueryRow(ctx, rbSql, args...)
 }
