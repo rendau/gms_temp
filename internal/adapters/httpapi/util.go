@@ -2,7 +2,7 @@ package httpapi
 
 import (
 	"encoding/json"
-	"github.com/rendau/gms_temp/internal/errs"
+	"github.com/rendau/gms_temp/internal/domain/errs"
 	"log"
 	"net/http"
 )
@@ -25,7 +25,7 @@ func (a *St) uHandleError(err error, w http.ResponseWriter) {
 			})
 		default:
 			a.uRespondJSON(w, ErrRepSt{
-				ErrorCode: errs.ServerNA.Error(),
+				ErrorCode: errs.ServiceNA.Error(),
 			})
 		}
 	}
