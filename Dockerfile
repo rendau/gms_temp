@@ -14,7 +14,7 @@ RUN make
 
 FROM alpine:latest
 
-RUN apk --no-cache update && apk --no-cache upgrade && apk add --no-cache ca-certificates tzdata
+RUN apk add --no-cache --upgrade ca-certificates tzdata
 
 WORKDIR /app
 

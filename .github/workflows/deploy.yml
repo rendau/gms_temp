@@ -12,11 +12,6 @@ jobs:
       REPO: gms_temp
       IMAGE: gms_temp
     steps:
-      - name: Set up Go
-        uses: actions/setup-go@v1
-        with:
-          go-version: 1.15
-
       - name: Check out code into the Go module directory
         uses: actions/checkout@v2
 

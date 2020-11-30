@@ -1,1 +1,1 @@
-# Go micro-service template
+# Go micro-service
