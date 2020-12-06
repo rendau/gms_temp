@@ -2,15 +2,15 @@ package pg
 
 import (
 	"context"
+	"strconv"
+	"strings"
+	"time"
+
 	"github.com/jackc/pgconn"
 	"github.com/jackc/pgx/v4"
 	"github.com/jackc/pgx/v4/pgxpool"
 	_ "github.com/jackc/pgx/v4/stdlib" // driver
-	"github.com/rendau/gms_temp/internal/domain/errs"
 	"github.com/rendau/gms_temp/internal/interfaces"
-	"strconv"
-	"strings"
-	"time"
 )
 
 const ErrMsg = "PG-error"
@@ -39,10 +39,10 @@ func NewSt(lg interfaces.Logger, dsn string) (*St, error) {
 		return nil, err
 	}
 
-	dbConfig.MaxConns = 30
-	dbConfig.MinConns = 3
-	dbConfig.MaxConnLifetime = 0
-	dbConfig.MaxConnIdleTime = 3 * time.Minute
+	dbConfig.MaxConns = 100
+	dbConfig.MinConns = 10
+	dbConfig.MaxConnLifetime = 30 * time.Minute
+	dbConfig.MaxConnIdleTime = 15 * time.Minute
 	dbConfig.HealthCheckPeriod = 20 * time.Second
 	dbConfig.LazyConnect = true
 
@@ -58,18 +58,14 @@ func NewSt(lg interfaces.Logger, dsn string) (*St, error) {
 	}, nil
 }
 
-func (d *St) handleError(err error) error {
+func (d *St) handleError(ctx context.Context, err error) error {
 	if err == nil {
 		return nil
 	}
 
-	if err == context.Canceled ||
-		err == context.DeadlineExceeded {
-		d.lg.Infow("PG-error, context canceled")
-		return errs.ServiceNA
-	}
+	// errStr := err.Error()
 
-	d.lg.Errorw(ErrMsg, err)
+	// d.lg.Errorw(ErrMsg, err)
 
 	return err
 }
@@ -107,7 +103,7 @@ func (d *St) getContextTransaction(ctx context.Context) pgx.Tx {
 func (d *St) ContextWithTransaction(ctx context.Context) (context.Context, error) {
 	tx, err := d.Con.Begin(ctx)
 	if err != nil {
-		return ctx, d.handleError(err)
+		return ctx, d.handleError(ctx, err)
 	}
 
 	return context.WithValue(ctx, TransactionCtxKey, &txContainerSt{tx: tx}), nil
@@ -121,13 +117,11 @@ func (d *St) CommitContextTransaction(ctx context.Context) error {
 
 	err := tx.Commit(ctx)
 	if err != nil {
-		if err == context.Canceled ||
-			err == context.DeadlineExceeded {
-			return errs.ContextCancelled
-		}
 		if err != pgx.ErrTxClosed &&
 			err != pgx.ErrTxCommitRollback {
-			return d.handleError(err)
+			_ = tx.Rollback(ctx)
+
+			return d.handleError(ctx, err)
 		}
 	}
 
@@ -140,17 +134,7 @@ func (d *St) RollbackContextTransaction(ctx context.Context) {
 		return
 	}
 
-	err := tx.Rollback(ctx)
-	if err != nil {
-		if err == context.Canceled ||
-			err == context.DeadlineExceeded {
-			return
-		}
-		if err != pgx.ErrTxClosed &&
-			err != pgx.ErrTxCommitRollback {
-			_ = d.handleError(err)
-		}
-	}
+	_ = tx.Rollback(ctx)
 }
 
 func (d *St) RenewContextTransaction(ctx context.Context) error {
@@ -164,20 +148,19 @@ func (d *St) RenewContextTransaction(ctx context.Context) error {
 
 	if container.tx != nil {
 		err = container.tx.Commit(ctx)
-		if err != nil &&
-			err != pgx.ErrTxClosed &&
-			err != pgx.ErrTxCommitRollback &&
-			err != context.Canceled &&
-			err != context.DeadlineExceeded {
-			// try to rollback
-			_ = container.tx.Rollback(ctx)
-			return d.handleError(err)
+		if err != nil {
+			if err != pgx.ErrTxClosed &&
+				err != pgx.ErrTxCommitRollback {
+				_ = container.tx.Rollback(ctx)
+
+				return d.handleError(ctx, err)
+			}
 		}
 	}
 
 	container.tx, err = d.Con.Begin(ctx)
 	if err != nil {
-		return d.handleError(err)
+		return d.handleError(ctx, err)
 	}
 
 	return nil
