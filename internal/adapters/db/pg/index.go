@@ -166,15 +166,15 @@ func (d *St) RenewContextTransaction(ctx context.Context) error {
 	return nil
 }
 
-func (d *St) dbExec(ctx context.Context, sql string, args ...interface{}) (pgconn.CommandTag, error) {
+func (d *St) DbExec(ctx context.Context, sql string, args ...interface{}) (pgconn.CommandTag, error) {
 	return d.getCon(ctx).Exec(ctx, sql, args...)
 }
 
-func (d *St) dbQuery(ctx context.Context, sql string, args ...interface{}) (pgx.Rows, error) {
+func (d *St) DbQuery(ctx context.Context, sql string, args ...interface{}) (pgx.Rows, error) {
 	return d.getCon(ctx).Query(ctx, sql, args...)
 }
 
-func (d *St) dbQueryRow(ctx context.Context, sql string, args ...interface{}) pgx.Row {
+func (d *St) DbQueryRow(ctx context.Context, sql string, args ...interface{}) pgx.Row {
 	return d.getCon(ctx).QueryRow(ctx, sql, args...)
 }
 
@@ -192,19 +192,19 @@ func (d *St) queryRebindNamed(sql string, argMap map[string]interface{}) (string
 	return resultQuery, args
 }
 
-func (d *St) dbExecM(ctx context.Context, sql string, argMap map[string]interface{}) (pgconn.CommandTag, error) {
+func (d *St) DbExecM(ctx context.Context, sql string, argMap map[string]interface{}) (pgconn.CommandTag, error) {
 	rbSql, args := d.queryRebindNamed(sql, argMap)
 
 	return d.getCon(ctx).Exec(ctx, rbSql, args...)
 }
 
-func (d *St) dbQueryM(ctx context.Context, sql string, argMap map[string]interface{}) (pgx.Rows, error) {
+func (d *St) DbQueryM(ctx context.Context, sql string, argMap map[string]interface{}) (pgx.Rows, error) {
 	rbSql, args := d.queryRebindNamed(sql, argMap)
 
 	return d.getCon(ctx).Query(ctx, rbSql, args...)
 }
 
-func (d *St) dbQueryRowM(ctx context.Context, sql string, argMap map[string]interface{}) pgx.Row {
+func (d *St) DbQueryRowM(ctx context.Context, sql string, argMap map[string]interface{}) pgx.Row {
 	rbSql, args := d.queryRebindNamed(sql, argMap)
 
 	return d.getCon(ctx).QueryRow(ctx, rbSql, args...)
