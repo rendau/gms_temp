@@ -1,11 +1,12 @@
-package httpapi
+package rest
 
 import (
 	"context"
-	"github.com/rendau/gms_temp/internal/domain/core"
-	"github.com/rendau/gms_temp/internal/interfaces"
 	"net/http"
 	"time"
+
+	"github.com/rendau/gms_temp/internal/domain/core"
+	"github.com/rendau/gms_temp/internal/interfaces"
 )
 
 type St struct {

@@ -2,20 +2,21 @@ package cmd
 
 import (
 	"context"
-	memCache "github.com/rendau/gms_temp/internal/adapters/cache/mem"
-	"github.com/rendau/gms_temp/internal/adapters/cache/redis"
-	"github.com/rendau/gms_temp/internal/adapters/db/pg"
-	"github.com/rendau/gms_temp/internal/adapters/httpapi"
-	"github.com/rendau/gms_temp/internal/adapters/logger/zap"
-	"github.com/rendau/gms_temp/internal/domain/core"
-	"github.com/rendau/gms_temp/internal/interfaces"
-	"github.com/spf13/viper"
 	"log"
 	"os"
 	"os/signal"
 	"strings"
 	"syscall"
 	"time"
+
+	memCache "github.com/rendau/gms_temp/internal/adapters/cache/mem"
+	"github.com/rendau/gms_temp/internal/adapters/cache/redis"
+	"github.com/rendau/gms_temp/internal/adapters/db/pg"
+	"github.com/rendau/gms_temp/internal/adapters/httpapi/rest"
+	"github.com/rendau/gms_temp/internal/adapters/logger/zap"
+	"github.com/rendau/gms_temp/internal/domain/core"
+	"github.com/rendau/gms_temp/internal/interfaces"
+	"github.com/spf13/viper"
 )
 
 func Execute() {
@@ -28,7 +29,7 @@ func Execute() {
 		cache   interfaces.Cache
 		db      interfaces.Db
 		core    *core.St
-		restApi *httpapi.St
+		restApi *rest.St
 	}{}
 
 	app.lg, err = zap.New(viper.GetString("log_level"), viper.GetBool("debug"), false)
@@ -58,7 +59,7 @@ func Execute() {
 		app.db,
 	)
 
-	app.restApi = httpapi.New(
+	app.restApi = rest.New(
 		app.lg,
 		viper.GetString("http_listen"),
 		app.core,

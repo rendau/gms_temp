@@ -1,7 +1,6 @@
-package httpapi
+package rest
 
 import (
-	"context"
 	"net/http"
 
 	"github.com/rs/cors"
@@ -31,18 +30,11 @@ func (a *St) middleware(h http.Handler) http.Handler {
 
 func (a *St) mwRecovery(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		cancelCtx, cancel := context.WithCancel(r.Context())
-		r = r.WithContext(cancelCtx)
 		defer func() {
 			if err := recover(); err != nil {
-				cancel()
+				a.uLogErrorRequest(r, err, "Panic in http handler")
+
 				w.WriteHeader(http.StatusInternalServerError)
-				a.lg.Errorw(
-					"Panic in http handler",
-					err,
-					"method", r.Method,
-					"path", r.URL,
-				)
 			}
 		}()
 		h.ServeHTTP(w, r)

@@ -7,6 +7,8 @@ func (e Err) Error() string {
 }
 
 const (
-	ContextCancelled = Err("context_cancelled")
 	ServiceNA        = Err("server_not_available")
+	NotAuthorized    = Err("not_authorized")
+	PermissionDenied = Err("permission_denied")
+	ObjectNotFound   = Err("object_not_found")
 )
