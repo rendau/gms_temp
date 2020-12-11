@@ -9,6 +9,8 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/rendau/gms_temp/internal/domain/usecases"
+
 	memCache "github.com/rendau/gms_temp/internal/adapters/cache/mem"
 	"github.com/rendau/gms_temp/internal/adapters/cache/redis"
 	"github.com/rendau/gms_temp/internal/adapters/db/pg"
@@ -29,6 +31,7 @@ func Execute() {
 		cache   interfaces.Cache
 		db      interfaces.Db
 		core    *core.St
+		ucs     *usecases.St
 		restApi *rest.St
 	}{}
 
@@ -59,10 +62,17 @@ func Execute() {
 		app.db,
 	)
 
+	app.ucs = usecases.New(
+		app.lg,
+		app.db,
+		app.cache,
+		app.core,
+	)
+
 	app.restApi = rest.New(
 		app.lg,
 		viper.GetString("http_listen"),
-		app.core,
+		app.ucs,
 	)
 
 	app.lg.Infow(

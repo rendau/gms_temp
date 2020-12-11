@@ -5,22 +5,22 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/rendau/gms_temp/internal/domain/core"
+	"github.com/rendau/gms_temp/internal/domain/usecases"
 	"github.com/rendau/gms_temp/internal/interfaces"
 )
 
 type St struct {
-	lg interfaces.Logger
-	cr *core.St
+	lg  interfaces.Logger
+	ucs *usecases.St
 
 	server *http.Server
 	lChan  chan error
 }
 
-func New(lg interfaces.Logger, listen string, cr *core.St) *St {
+func New(lg interfaces.Logger, listen string, ucs *usecases.St) *St {
 	api := &St{
 		lg:    lg,
-		cr:    cr,
+		ucs:   ucs,
 		lChan: make(chan error, 1),
 	}
 

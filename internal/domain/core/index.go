@@ -11,9 +11,11 @@ type St struct {
 }
 
 func New(lg interfaces.Logger, cache interfaces.Cache, db interfaces.Db) *St {
-	return &St{
+	c := &St{
 		lg:    lg,
 		cache: cache,
 		db:    db,
 	}
+
+	return c
 }

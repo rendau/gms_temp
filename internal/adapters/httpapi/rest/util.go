@@ -37,10 +37,10 @@ func (a *St) uRespondJSON(w http.ResponseWriter, obj interface{}) {
 	}
 }
 
-func (a *St) uHandleError(err error, r *http.Request, w http.ResponseWriter) {
+func (a *St) uHandleError(err error, r *http.Request, w http.ResponseWriter) bool {
 	if err != nil {
 		switch cErr := err.(type) {
-		case *errs.Err:
+		case errs.Err:
 			a.uRespondJSON(w, ErrRepSt{
 				ErrorCode: cErr.Error(),
 			})
@@ -49,7 +49,11 @@ func (a *St) uHandleError(err error, r *http.Request, w http.ResponseWriter) {
 
 			w.WriteHeader(http.StatusInternalServerError)
 		}
+
+		return true
 	}
+
+	return false
 }
 
 func (a *St) uLogErrorRequest(r *http.Request, err interface{}, msg string) {
@@ -62,16 +66,14 @@ func (a *St) uLogErrorRequest(r *http.Request, err interface{}, msg string) {
 }
 
 func (a *St) uGetRequestContext(r *http.Request) context.Context {
-	// var err error
+	token := r.Header.Get("Authorization")
+	if token == "" { // try from query parameter
+		token = r.URL.Query().Get("auth_token")
+	}
 
-	// token := r.Header.Get("Authorization")
-	// if token == "" { // try from query parameter
-	// 	token = r.URL.Query().Get("auth_token")
-	// }
+	ctx := context.Background()
 
-	// return a.ucs.ContextWithSession(context.Background(), ses)
-
-	return context.Background()
+	return a.ucs.ContextWithSession(ctx, a.ucs.SessionGet(ctx, token))
 }
 
 func (a *St) uExtractPaginationPars(pars url.Values) (offset int64, limit int64, page int64) {
