@@ -14,8 +14,7 @@ import (
 const cacheKeyPattern = "user_session_%s"
 const cacheDuration = 20 * time.Minute
 
-func (u *St) SessionGet(ctx context.Context,
-	token string) *entities.Session {
+func (u *St) SessionGet(ctx context.Context, token string) *entities.Session {
 	result := &entities.Session{}
 
 	if token == "" {
@@ -40,8 +39,7 @@ func (u *St) SesRequireAuth(ses *entities.Session) error {
 	return nil
 }
 
-func (u *St) SessionDelete(ctx context.Context,
-	id int64) {
+func (u *St) SessionDelete(ctx context.Context, id int64) {
 	u.sessionDeleteUsrIdFromCache(id)
 }
 
