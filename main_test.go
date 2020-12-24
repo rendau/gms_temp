@@ -1,15 +1,16 @@
 package main
 
 import (
+	"log"
+	"os"
+	"testing"
+
 	"github.com/rendau/gms_temp/internal/adapters/cache/mem"
 	"github.com/rendau/gms_temp/internal/adapters/db/pg"
 	"github.com/rendau/gms_temp/internal/adapters/logger/zap"
 	"github.com/rendau/gms_temp/internal/domain/core"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/require"
-	"log"
-	"os"
-	"testing"
 )
 
 const confPath = "test_conf.yml"
@@ -43,15 +44,15 @@ func TestMain(m *testing.M) {
 
 	app.cache = mem.New()
 
-	app.db, err = pg.NewSt(app.lg, viper.GetString("pg.dsn"))
+	app.db, err = pg.New(app.lg, viper.GetString("pg.dsn"))
 	if err != nil {
 		app.lg.Fatal(err)
 	}
 
 	app.core = core.New(
 		app.lg,
-		app.cache,
 		app.db,
+		app.cache,
 	)
 
 	// Start tests

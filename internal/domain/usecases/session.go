@@ -2,7 +2,6 @@ package usecases
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"time"
 
@@ -44,19 +43,13 @@ func (u *St) SessionDelete(ctx context.Context, id int64) {
 }
 
 func (u *St) sessionGetFromCache(key string) *entities.Session {
-	raw, ok, err := u.cc.Get(key)
-	if err != nil {
-		return nil
-	}
-
-	if !ok {
-		return nil
-	}
-
 	result := &entities.Session{}
 
-	err = json.Unmarshal(raw, result)
+	ok, err := u.cache.GetJsonObj(key, &result)
 	if err != nil {
+		return nil
+	}
+	if !ok {
 		return nil
 	}
 
@@ -64,33 +57,18 @@ func (u *St) sessionGetFromCache(key string) *entities.Session {
 }
 
 func (u *St) sessionSetToCache(key string, v *entities.Session) {
-	raw, err := json.Marshal(v)
-	if err != nil {
-		return
-	}
-
-	err = u.cc.Set(key, raw, cacheDuration)
-	if err != nil {
-		return
-	}
+	_ = u.cache.SetJsonObj(key, v, cacheDuration)
 }
 
 func (u *St) sessionDeleteUsrIdFromCache(id int64) {
-	var err error
-	var ses entities.Session
-	var raw []byte
-	var found bool
-
-	keys := u.cc.Keys(fmt.Sprintf(cacheKeyPattern, "*"))
+	keys := u.cache.Keys(fmt.Sprintf(cacheKeyPattern, "*"))
 
 	for _, key := range keys {
-		raw, found, _ = u.cc.Get(key)
+		ses := entities.Session{}
+		found, _ := u.cache.GetJsonObj(key, &ses)
 		if found {
-			err = json.Unmarshal(raw, &ses)
-			if err == nil {
-				if ses.ID == id {
-					_ = u.cc.Del(key)
-				}
+			if ses.ID == id {
+				_ = u.cache.Del(key)
 			}
 		}
 	}

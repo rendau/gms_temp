@@ -32,7 +32,7 @@ type txContainerSt struct {
 	tx pgx.Tx
 }
 
-func NewSt(lg interfaces.Logger, dsn string) (*St, error) {
+func New(lg interfaces.Logger, dsn string) (*St, error) {
 	dbConfig, err := pgxpool.ParseConfig(dsn)
 	if err != nil {
 		lg.Errorw(ErrMsg+": Fail to parse dsn", err)

@@ -8,22 +8,22 @@ import (
 type St struct {
 	lg interfaces.Logger
 
-	db interfaces.Db
-	cc interfaces.Cache
-	cr *core.St
+	db    interfaces.Db
+	cache interfaces.Cache
+	cr    *core.St
 }
 
 func New(
 	lg interfaces.Logger,
 	db interfaces.Db,
-	cc interfaces.Cache,
+	cache interfaces.Cache,
 	cr *core.St,
 ) *St {
 	u := &St{
-		lg: lg,
-		db: db,
-		cr: cr,
-		cc: cc,
+		lg:    lg,
+		db:    db,
+		cr:    cr,
+		cache: cache,
 	}
 
 	return u

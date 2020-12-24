@@ -43,7 +43,7 @@ func Execute() {
 	if viper.GetString("redis.url") == "" {
 		app.cache = memCache.New()
 	} else {
-		app.cache = redis.NewRedisSt(
+		app.cache = redis.New(
 			app.lg,
 			viper.GetString("redis.url"),
 			viper.GetString("redis.psw"),
@@ -51,15 +51,15 @@ func Execute() {
 		)
 	}
 
-	app.db, err = pg.NewSt(app.lg, viper.GetString("pg.dsn"))
+	app.db, err = pg.New(app.lg, viper.GetString("pg.dsn"))
 	if err != nil {
 		app.lg.Fatal(err)
 	}
 
 	app.core = core.New(
 		app.lg,
-		app.cache,
 		app.db,
+		app.cache,
 	)
 
 	app.ucs = usecases.New(

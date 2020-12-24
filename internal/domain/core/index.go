@@ -6,15 +6,19 @@ import (
 
 type St struct {
 	lg    interfaces.Logger
-	cache interfaces.Cache
 	db    interfaces.Db
+	cache interfaces.Cache
 }
 
-func New(lg interfaces.Logger, cache interfaces.Cache, db interfaces.Db) *St {
+func New(
+	lg interfaces.Logger,
+	db interfaces.Db,
+	cache interfaces.Cache,
+) *St {
 	c := &St{
 		lg:    lg,
-		cache: cache,
 		db:    db,
+		cache: cache,
 	}
 
 	return c
