@@ -44,7 +44,7 @@ func TestMain(m *testing.M) {
 
 	app.cache = mem.New()
 
-	app.db, err = pg.New(app.lg, viper.GetString("pg.dsn"))
+	app.db, err = pg.New(app.lg, viper.GetString("pg.dsn"), true)
 	if err != nil {
 		app.lg.Fatal(err)
 	}

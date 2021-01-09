@@ -26,6 +26,8 @@ func Execute() {
 
 	loadConf()
 
+	debug := viper.GetBool("debug")
+
 	app := struct {
 		lg      *zap.St
 		cache   interfaces.Cache
@@ -35,7 +37,7 @@ func Execute() {
 		restApi *rest.St
 	}{}
 
-	app.lg, err = zap.New(viper.GetString("log_level"), viper.GetBool("debug"), false)
+	app.lg, err = zap.New(viper.GetString("log_level"), debug, false)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -51,7 +53,7 @@ func Execute() {
 		)
 	}
 
-	app.db, err = pg.New(app.lg, viper.GetString("pg.dsn"))
+	app.db, err = pg.New(app.lg, viper.GetString("pg.dsn"), debug)
 	if err != nil {
 		app.lg.Fatal(err)
 	}

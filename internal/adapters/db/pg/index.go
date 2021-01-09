@@ -2,6 +2,7 @@ package pg
 
 import (
 	"context"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -17,7 +18,8 @@ const ErrMsg = "PG-error"
 const TransactionCtxKey = "pg_transaction"
 
 type St struct {
-	lg interfaces.Logger
+	debug bool
+	lg    interfaces.Logger
 
 	Con *pgxpool.Pool
 }
@@ -32,7 +34,11 @@ type txContainerSt struct {
 	tx pgx.Tx
 }
 
-func New(lg interfaces.Logger, dsn string) (*St, error) {
+var (
+	queryParamRegexp = regexp.MustCompile(`(?si)\$\{[^}]+\}`)
+)
+
+func New(lg interfaces.Logger, dsn string, debug bool) (*St, error) {
 	dbConfig, err := pgxpool.ParseConfig(dsn)
 	if err != nil {
 		lg.Errorw(ErrMsg+": Fail to parse dsn", err)
@@ -53,8 +59,9 @@ func New(lg interfaces.Logger, dsn string) (*St, error) {
 	}
 
 	return &St{
-		lg:  lg,
-		Con: dbPool,
+		debug: debug,
+		lg:    lg,
+		Con:   dbPool,
 	}, nil
 }
 
@@ -186,6 +193,14 @@ func (d *St) queryRebindNamed(sql string, argMap map[string]interface{}) (string
 		if strings.Contains(resultQuery, "${"+k+"}") {
 			args = append(args, v)
 			resultQuery = strings.ReplaceAll(resultQuery, "${"+k+"}", "$"+strconv.Itoa(len(args)))
+		}
+	}
+
+	if d.debug {
+		if strings.Index(resultQuery, "${") > -1 {
+			for _, x := range queryParamRegexp.FindAllString(resultQuery, 1) {
+				d.lg.Errorw("Missing param", nil, "param", x, "query", resultQuery)
+			}
 		}
 	}
 
