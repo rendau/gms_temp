@@ -8,6 +8,8 @@ type St struct {
 	lg    interfaces.Logger
 	db    interfaces.Db
 	cache interfaces.Cache
+
+	Session *Session
 }
 
 func New(
@@ -20,6 +22,8 @@ func New(
 		db:    db,
 		cache: cache,
 	}
+
+	c.Session = NewSession(c)
 
 	return c
 }
