@@ -9,14 +9,13 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/rendau/gms_temp/internal/domain/usecases"
-
 	memCache "github.com/rendau/gms_temp/internal/adapters/cache/mem"
 	"github.com/rendau/gms_temp/internal/adapters/cache/redis"
 	"github.com/rendau/gms_temp/internal/adapters/db/pg"
 	"github.com/rendau/gms_temp/internal/adapters/httpapi/rest"
 	"github.com/rendau/gms_temp/internal/adapters/logger/zap"
 	"github.com/rendau/gms_temp/internal/domain/core"
+	"github.com/rendau/gms_temp/internal/domain/usecases"
 	"github.com/rendau/gms_temp/internal/interfaces"
 	"github.com/spf13/viper"
 )
@@ -67,7 +66,6 @@ func Execute() {
 	app.ucs = usecases.New(
 		app.lg,
 		app.db,
-		app.cache,
 		app.core,
 	)
 
