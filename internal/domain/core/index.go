@@ -6,21 +6,21 @@ import (
 
 type St struct {
 	lg    interfaces.Logger
-	db    interfaces.Db
 	cache interfaces.Cache
+	db    interfaces.Db
 
 	Session *Session
 }
 
 func New(
 	lg interfaces.Logger,
-	db interfaces.Db,
 	cache interfaces.Cache,
+	db interfaces.Db,
 ) *St {
 	c := &St{
 		lg:    lg,
-		db:    db,
 		cache: cache,
+		db:    db,
 	}
 
 	c.Session = NewSession(c)

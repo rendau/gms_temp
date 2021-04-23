@@ -53,8 +53,8 @@ func TestMain(m *testing.M) {
 
 	app.core = core.New(
 		app.lg,
-		app.db,
 		app.cache,
+		app.db,
 	)
 
 	app.ucs = usecases.New(

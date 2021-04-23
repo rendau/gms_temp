@@ -59,8 +59,8 @@ func Execute() {
 
 	app.core = core.New(
 		app.lg,
-		app.db,
 		app.cache,
+		app.db,
 	)
 
 	app.ucs = usecases.New(
@@ -108,6 +108,8 @@ func Execute() {
 }
 
 func loadConf() {
+	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
+
 	viper.SetDefault("debug", "false")
 	viper.SetDefault("http_listen", ":80")
 	viper.SetDefault("log_level", "debug")
