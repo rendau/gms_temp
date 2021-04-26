@@ -1,3 +1,5 @@
 package cns
 
-const ()
+const (
+	MaximalPageSize = 1000
+)
