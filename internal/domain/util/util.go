@@ -73,3 +73,57 @@ func Int64SliceToString(src []int64, delimiter, emptyV string) string {
 
 	return res
 }
+
+func Int64SliceHasValue(sl []int64, v int64) bool {
+	for _, x := range sl {
+		if x == v {
+			return true
+		}
+	}
+
+	return false
+}
+
+func Int64SlicesAreSame(a, b []int64) bool {
+	for _, x := range a {
+		if !Int64SliceHasValue(b, x) {
+			return false
+		}
+	}
+
+	for _, x := range b {
+		if !Int64SliceHasValue(a, x) {
+			return false
+		}
+	}
+
+	return true
+}
+
+func Int64SlicesIntersection(sl1, sl2 []int64) []int64 {
+	result := make([]int64, 0)
+
+	if len(sl1) == 0 || len(sl2) == 0 {
+		return result
+	}
+
+	for _, x := range sl1 {
+		if Int64SliceHasValue(sl2, x) {
+			result = append(result, x)
+		}
+	}
+
+	return result
+}
+
+func Int64SliceExcludeValues(sl, vs []int64) []int64 {
+	result := make([]int64, 0, len(sl))
+
+	for _, x := range sl {
+		if !Int64SliceHasValue(vs, x) {
+			result = append(result, x)
+		}
+	}
+
+	return result
+}

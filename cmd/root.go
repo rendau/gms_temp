@@ -14,6 +14,10 @@ import (
 	"github.com/rendau/gms_temp/internal/adapters/db/pg"
 	"github.com/rendau/gms_temp/internal/adapters/httpapi/rest"
 	"github.com/rendau/gms_temp/internal/adapters/logger/zap"
+	smsMock "github.com/rendau/gms_temp/internal/adapters/sms/mock"
+	"github.com/rendau/gms_temp/internal/adapters/sms/smsc"
+	wsMock "github.com/rendau/gms_temp/internal/adapters/ws/mock"
+	"github.com/rendau/gms_temp/internal/adapters/ws/websocket"
 	"github.com/rendau/gms_temp/internal/domain/core"
 	"github.com/rendau/gms_temp/internal/domain/usecases"
 	"github.com/rendau/gms_temp/internal/interfaces"
@@ -31,6 +35,8 @@ func Execute() {
 		lg      *zap.St
 		cache   interfaces.Cache
 		db      interfaces.Db
+		sms     interfaces.Sms
+		ws      interfaces.Ws
 		core    *core.St
 		ucs     *usecases.St
 		restApi *rest.St
@@ -52,6 +58,24 @@ func Execute() {
 		)
 	}
 
+	if viper.GetString("ms_sms_url") == "" {
+		app.sms = smsMock.New()
+	} else {
+		app.sms = smsc.New(
+			app.lg,
+			viper.GetString("ms_sms_url"),
+		)
+	}
+
+	if viper.GetString("ms_ws_url") == "" {
+		app.ws = wsMock.New()
+	} else {
+		app.ws = websocket.New(
+			app.lg,
+			viper.GetString("ms_ws_url"),
+		)
+	}
+
 	app.db, err = pg.New(app.lg, viper.GetString("pg.dsn"), debug)
 	if err != nil {
 		app.lg.Fatal(err)
@@ -61,6 +85,8 @@ func Execute() {
 		app.lg,
 		app.cache,
 		app.db,
+		app.sms,
+		app.ws,
 	)
 
 	app.ucs = usecases.New(

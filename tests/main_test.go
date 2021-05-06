@@ -1,4 +1,4 @@
-package main
+package tests
 
 import (
 	"log"
@@ -8,28 +8,17 @@ import (
 	"github.com/rendau/gms_temp/internal/adapters/cache/mem"
 	"github.com/rendau/gms_temp/internal/adapters/db/pg"
 	"github.com/rendau/gms_temp/internal/adapters/logger/zap"
+	smsMock "github.com/rendau/gms_temp/internal/adapters/sms/mock"
+	wsMock "github.com/rendau/gms_temp/internal/adapters/ws/mock"
 	"github.com/rendau/gms_temp/internal/domain/core"
 	"github.com/rendau/gms_temp/internal/domain/usecases"
 	"github.com/spf13/viper"
-	"github.com/stretchr/testify/require"
-)
-
-const confPath = "test_conf.yml"
-
-var (
-	app = struct {
-		lg    *zap.St
-		cache *mem.St
-		db    *pg.St
-		core  *core.St
-		ucs   *usecases.St
-	}{}
 )
 
 func TestMain(m *testing.M) {
 	var err error
 
-	viper.SetConfigFile(confPath)
+	viper.SetConfigFile("test_conf.yml")
 	_ = viper.ReadInConfig()
 
 	viper.AutomaticEnv()
@@ -51,10 +40,16 @@ func TestMain(m *testing.M) {
 		app.lg.Fatal(err)
 	}
 
+	app.sms = smsMock.New()
+
+	app.ws = wsMock.New()
+
 	app.core = core.New(
 		app.lg,
 		app.cache,
 		app.db,
+		app.sms,
+		app.ws,
 	)
 
 	app.ucs = usecases.New(
@@ -63,12 +58,10 @@ func TestMain(m *testing.M) {
 		app.core,
 	)
 
+	resetDb()
+
 	// Start tests
 	code := m.Run()
 
 	os.Exit(code)
-}
-
-func TestMenu(t *testing.T) {
-	require.True(t, true, true)
 }
