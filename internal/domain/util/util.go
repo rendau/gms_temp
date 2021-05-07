@@ -21,6 +21,20 @@ func RequirePageSize(pars entities.PaginationParams, allowedPageSize int64) erro
 	return nil
 }
 
+func CoalesceInt64(v *int64, nv int64) int64 {
+	if v == nil {
+		return nv
+	}
+
+	return *v
+}
+
+func TimeInAppLocation(v *time.Time) {
+	if v != nil {
+		*v = (*v).In(cns.AppTimeLocation)
+	}
+}
+
 func NewInt(v int) *int {
 	return &v
 }
