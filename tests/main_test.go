@@ -50,6 +50,7 @@ func TestMain(m *testing.M) {
 		app.db,
 		app.sms,
 		app.ws,
+		false,
 	)
 
 	app.ucs = usecases.New(

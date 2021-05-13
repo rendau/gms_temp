@@ -87,6 +87,7 @@ func Execute() {
 		app.db,
 		app.sms,
 		app.ws,
+		debug,
 	)
 
 	app.ucs = usecases.New(

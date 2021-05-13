@@ -4,7 +4,6 @@ import (
 	"context"
 	"testing"
 
-	"github.com/rendau/gms_temp/internal/domain/entities"
 	"github.com/rendau/gms_temp/internal/domain/errs"
 	"github.com/stretchr/testify/require"
 )
@@ -58,14 +57,4 @@ func domainErrIsEqual(t *testing.T, v error, expectedErr error, msgArgs ...inter
 			t.Fatal("bad error type: " + v.Error())
 		}
 	}
-}
-
-func ctxWithSes(ctx context.Context, usrId int64) context.Context {
-	if ctx == nil {
-		ctx = context.Background()
-	}
-
-	return app.ucs.ContextWithSession(ctx, &entities.Session{
-		ID: usrId,
-	})
 }

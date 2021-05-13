@@ -5,13 +5,15 @@ import (
 )
 
 type St struct {
-	lg    interfaces.Logger
-	cache interfaces.Cache
-	db    interfaces.Db
-	sms   interfaces.Sms
-	ws    interfaces.Ws
+	lg         interfaces.Logger
+	cache      interfaces.Cache
+	db         interfaces.Db
+	sms        interfaces.Sms
+	ws         interfaces.Ws
+	noSmsCheck bool
 
 	Session *Session
+	Usr     *Usr
 }
 
 func New(
@@ -20,16 +22,19 @@ func New(
 	db interfaces.Db,
 	sms interfaces.Sms,
 	ws interfaces.Ws,
+	noSmsCheck bool,
 ) *St {
 	c := &St{
-		lg:    lg,
-		cache: cache,
-		db:    db,
-		sms:   sms,
-		ws:    ws,
+		lg:         lg,
+		cache:      cache,
+		db:         db,
+		sms:        sms,
+		ws:         ws,
+		noSmsCheck: noSmsCheck,
 	}
 
 	c.Session = NewSession(c)
+	c.Usr = NewUsr(c)
 
 	return c
 }

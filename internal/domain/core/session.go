@@ -20,6 +20,8 @@ func NewSession(r *St) *Session {
 }
 
 func (c *Session) Get(ctx context.Context, token string) *entities.Session {
+	var err error
+
 	result := &entities.Session{}
 
 	if token == "" {
@@ -32,7 +34,17 @@ func (c *Session) Get(ctx context.Context, token string) *entities.Session {
 		return cacheV
 	}
 
-	// try to auth in db with the token, then set to cache
+	result.ID, err = c.r.Usr.AuthByToken(ctx, token)
+	if err != nil {
+		return result
+	}
+
+	result.TypeId, err = c.r.Usr.GetTypeId(ctx, result.ID)
+	if err != nil {
+		return result
+	}
+
+	c.setToCache(cacheKey, result)
 
 	return result
 }

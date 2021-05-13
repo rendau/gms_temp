@@ -1,7 +1,6 @@
 package rest
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -17,9 +16,7 @@ func (a *St) uParseRequestJSON(w http.ResponseWriter, r *http.Request, dst inter
 	decoder := json.NewDecoder(r.Body)
 
 	if err := decoder.Decode(dst); err != nil {
-		a.uRespondJSON(w, ErrRepSt{
-			ErrorCode: "bad_json",
-		})
+		a.uHandleError(errs.BadJson, r, w)
 
 		return false
 	}
@@ -27,10 +24,14 @@ func (a *St) uParseRequestJSON(w http.ResponseWriter, r *http.Request, dst inter
 	return true
 }
 
-func (a *St) uRespondJSON(w http.ResponseWriter, obj interface{}) {
+func (a *St) uRespondJSON(w http.ResponseWriter, statusCode int, obj interface{}) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 
-	w.WriteHeader(http.StatusOK)
+	if statusCode == 0 {
+		statusCode = http.StatusOK
+	}
+
+	w.WriteHeader(statusCode)
 
 	if err := json.NewEncoder(w).Encode(obj); err != nil {
 		a.lg.Infow("Fail to send response", "error", err)
@@ -41,7 +42,7 @@ func (a *St) uHandleError(err error, r *http.Request, w http.ResponseWriter) boo
 	if err != nil {
 		switch cErr := err.(type) {
 		case errs.Err:
-			a.uRespondJSON(w, ErrRepSt{
+			a.uRespondJSON(w, http.StatusBadRequest, ErrRepSt{
 				ErrorCode: cErr.Error(),
 			})
 		default:
@@ -65,15 +66,13 @@ func (a *St) uLogErrorRequest(r *http.Request, err interface{}, msg string) {
 	)
 }
 
-func (a *St) uGetRequestContext(r *http.Request) context.Context {
+func (a *St) uGetRequestToken(r *http.Request) string {
 	token := r.Header.Get("Authorization")
 	if token == "" { // try from query parameter
 		token = r.URL.Query().Get("auth_token")
 	}
 
-	ctx := context.Background()
-
-	return a.ucs.ContextWithSession(ctx, a.ucs.SessionGet(ctx, token))
+	return token
 }
 
 func (a *St) uExtractPaginationPars(pars url.Values) (offset int64, limit int64, page int64) {
