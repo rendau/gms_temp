@@ -34,7 +34,7 @@ type UsrListParsSt struct {
 	PaginationParams
 
 	Ids    *[]int64
-	TypeId *int64
+	TypeId *int
 	Search *string
 
 	SortBy *string //

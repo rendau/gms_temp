@@ -1,6 +1,7 @@
 package rest
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -66,13 +67,15 @@ func (a *St) uLogErrorRequest(r *http.Request, err interface{}, msg string) {
 	)
 }
 
-func (a *St) uGetRequestToken(r *http.Request) string {
+func (a *St) uGetRequestContext(r *http.Request) context.Context {
 	token := r.Header.Get("Authorization")
 	if token == "" { // try from query parameter
 		token = r.URL.Query().Get("auth_token")
 	}
 
-	return token
+	ctx := context.Background()
+
+	return a.ucs.ContextWithSession(ctx, a.ucs.SessionGet(ctx, token))
 }
 
 func (a *St) uExtractPaginationPars(pars url.Values) (offset int64, limit int64, page int64) {
@@ -109,6 +112,13 @@ func (a *St) uQpParseBool(values url.Values, key string) *bool {
 		}
 	}
 	return nil
+}
+
+func (a *St) uQpParseBoolV(values url.Values, key string) bool {
+	if x := a.uQpParseBool(values, key); x != nil {
+		return *x
+	}
+	return false
 }
 
 func (a *St) uQpParseInt64(values url.Values, key string) *int64 {

@@ -9,15 +9,13 @@ import (
 	"github.com/rendau/gms_temp/internal/domain/util"
 )
 
-func (u *St) UsrList(token string,
+func (u *St) UsrList(ctx context.Context,
 	pars *entities.UsrListParsSt) ([]*entities.UsrListSt, int64, error) {
 	var err error
 
-	ctx := context.Background()
+	ses := u.ContextGetSession(ctx)
 
-	ses := u.cr.Session.Get(ctx, token)
-
-	if err = u.SesRequireOneOfTypeIds(ses); err != nil {
+	if err = u.SessionRequireOneOfTypeIds(ses); err != nil {
 		return nil, 0, err
 	}
 
@@ -42,15 +40,13 @@ func (u *St) UsrList(token string,
 	return usrs, totalCnt, nil
 }
 
-func (u *St) UsrGet(token string,
+func (u *St) UsrGet(ctx context.Context,
 	id int64) (*entities.UsrSt, error) {
 	var err error
 
-	ctx := context.Background()
+	ses := u.ContextGetSession(ctx)
 
-	ses := u.cr.Session.Get(ctx, token)
-
-	if err = u.SesRequireAuth(ses); err != nil {
+	if err = u.SessionRequireAuth(ses); err != nil {
 		return nil, err
 	}
 
@@ -71,15 +67,13 @@ func (u *St) UsrGet(token string,
 	return usr, nil
 }
 
-func (u *St) UsrCreate(token string,
+func (u *St) UsrCreate(ctx context.Context,
 	obj *entities.UsrCUSt) (int64, error) {
 	var err error
 
-	ctx := context.Background()
+	ses := u.ContextGetSession(ctx)
 
-	ses := u.cr.Session.Get(ctx, token)
-
-	if err = u.SesRequireOneOfTypeIds(ses); err != nil {
+	if err = u.SessionRequireOneOfTypeIds(ses); err != nil {
 		return 0, err
 	}
 
@@ -104,15 +98,13 @@ func (u *St) UsrCreate(token string,
 	return newId, nil
 }
 
-func (u *St) UsrUpdate(token string,
+func (u *St) UsrUpdate(ctx context.Context,
 	id int64, obj *entities.UsrCUSt) error {
 	var err error
 
-	ctx := context.Background()
+	ses := u.ContextGetSession(ctx)
 
-	ses := u.cr.Session.Get(ctx, token)
-
-	if err = u.SesRequireOneOfTypeIds(ses); err != nil {
+	if err = u.SessionRequireOneOfTypeIds(ses); err != nil {
 		return err
 	}
 
@@ -137,15 +129,13 @@ func (u *St) UsrUpdate(token string,
 	return nil
 }
 
-func (u *St) UsrDelete(token string,
+func (u *St) UsrDelete(ctx context.Context,
 	id int64) error {
 	var err error
 
-	ctx := context.Background()
+	ses := u.ContextGetSession(ctx)
 
-	ses := u.cr.Session.Get(ctx, token)
-
-	if err = u.SesRequireOneOfTypeIds(ses); err != nil {
+	if err = u.SessionRequireOneOfTypeIds(ses); err != nil {
 		return err
 	}
 

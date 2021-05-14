@@ -49,7 +49,7 @@ func (c *Session) Get(ctx context.Context, token string) *entities.Session {
 	return result
 }
 
-func (c *Session) Delete(ctx context.Context, id int64) {
+func (c *Session) Delete(id int64) {
 	c.deleteUsrIdFromCache(id)
 }
 

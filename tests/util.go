@@ -2,6 +2,7 @@ package tests
 
 import (
 	"context"
+	"log"
 	"testing"
 
 	"github.com/rendau/gms_temp/internal/domain/errs"
@@ -57,4 +58,17 @@ func domainErrIsEqual(t *testing.T, v error, expectedErr error, msgArgs ...inter
 			t.Fatal("bad error type: " + v.Error())
 		}
 	}
+}
+
+func ctxWithSes(ctx context.Context, usrId int64) context.Context {
+	if ctx == nil {
+		ctx = context.Background()
+	}
+
+	token, err := app.core.Usr.GetOrCreateToken(ctx, usrId)
+	if err != nil {
+		log.Fatalln(err.Error())
+	}
+
+	return app.ucs.ContextWithSession(ctx, app.ucs.SessionGet(ctx, token))
 }

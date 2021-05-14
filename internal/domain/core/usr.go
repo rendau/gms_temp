@@ -234,7 +234,7 @@ func (c *Usr) GetOrCreateToken(ctx context.Context, id int64) (string, error) {
 	}
 
 	if token == "" {
-		token, err = c.GenerateAndSaveAuthToken(ctx, id)
+		token, err = c.GenerateAndSaveToken(ctx, id)
 		if err != nil {
 			return "", err
 		}
@@ -243,10 +243,26 @@ func (c *Usr) GetOrCreateToken(ctx context.Context, id int64) (string, error) {
 	return token, nil
 }
 
+func (c *Usr) GenerateAndSaveToken(ctx context.Context, id int64) (string, error) {
+	tokenSrc := fmt.Sprintf("auth-lt-token %d %s", id, time.Now())
+	token := fmt.Sprintf("%x", sha512.Sum512([]byte(tokenSrc)))
+
+	err := c.SetToken(ctx, id, token)
+	if err != nil {
+		return "", err
+	}
+
+	return token, nil
+}
+
 func (c *Usr) SetToken(ctx context.Context, id int64, v string) error {
-	c.r.Session.Delete(ctx, id)
+	c.r.Session.Delete(id)
 
 	return c.r.db.UsrSetToken(ctx, id, v)
+}
+
+func (c *Usr) ResetToken(ctx context.Context, id int64) error {
+	return c.SetToken(ctx, id, "")
 }
 
 func (c *Usr) GetIdForToken(ctx context.Context, token string, errNE bool) (int64, error) {
@@ -366,7 +382,7 @@ func (c *Usr) Reg(ctx context.Context, data *entities.UsrRegisterSt) (int64, str
 		return 0, "", err
 	}
 
-	token, err := c.GenerateAndSaveAuthToken(ctx, id)
+	token, err := c.GenerateAndSaveToken(ctx, id)
 	if err != nil {
 		return 0, "", err
 	}
@@ -374,22 +390,6 @@ func (c *Usr) Reg(ctx context.Context, data *entities.UsrRegisterSt) (int64, str
 	c.RemovePhoneValidatingCache(ctx, data.Phone)
 
 	return id, token, nil
-}
-
-func (c *Usr) GenerateAndSaveAuthToken(ctx context.Context, id int64) (string, error) {
-	tokenSrc := fmt.Sprintf("auth-lt-token %d %s", id, time.Now())
-	token := fmt.Sprintf("%x", sha512.Sum512([]byte(tokenSrc)))
-
-	err := c.SetToken(ctx, id, token)
-	if err != nil {
-		return "", err
-	}
-
-	return token, nil
-}
-
-func (c *Usr) ResetToken(ctx context.Context, id int64) error {
-	return c.SetToken(ctx, id, "")
 }
 
 func (c *Usr) ValidateCU(ctx context.Context, obj *entities.UsrCUSt, id int64) error {
@@ -479,6 +479,8 @@ func (c *Usr) Update(ctx context.Context, id int64, obj *entities.UsrCUSt) error
 		return err
 	}
 
+	c.r.Session.Delete(id)
+
 	return nil
 }
 
@@ -500,13 +502,17 @@ func (c *Usr) ChangePhone(ctx context.Context, id int64, phone string, smsCode i
 	})
 }
 
+func (c *Usr) Logout(ctx context.Context, id int64) error {
+	return c.ResetToken(ctx, id)
+}
+
 func (c *Usr) Delete(ctx context.Context, id int64) error {
 	err := c.r.db.UsrDelete(ctx, id)
 	if err != nil {
 		return err
 	}
 
-	c.r.Session.Delete(ctx, id)
+	c.r.Session.Delete(id)
 
 	return nil
 }
