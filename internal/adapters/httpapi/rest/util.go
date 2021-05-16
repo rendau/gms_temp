@@ -130,6 +130,13 @@ func (a *St) uQpParseInt64(values url.Values, key string) *int64 {
 	return nil
 }
 
+func (a *St) uQpParseInt64V(values url.Values, key string) int64 {
+	if x := a.uQpParseInt64(values, key); x != nil {
+		return *x
+	}
+	return 0
+}
+
 func (a *St) uQpParseFloat64(values url.Values, key string) *float64 {
 	if qp, ok := values[key]; ok {
 		if result, err := strconv.ParseFloat(qp[0], 64); err == nil {
@@ -137,6 +144,13 @@ func (a *St) uQpParseFloat64(values url.Values, key string) *float64 {
 		}
 	}
 	return nil
+}
+
+func (a *St) uQpParseFloat64V(values url.Values, key string) float64 {
+	if x := a.uQpParseFloat64(values, key); x != nil {
+		return *x
+	}
+	return 0
 }
 
 func (a *St) uQpParseInt(values url.Values, key string) *int {
@@ -148,11 +162,25 @@ func (a *St) uQpParseInt(values url.Values, key string) *int {
 	return nil
 }
 
+func (a *St) uQpParseIntV(values url.Values, key string) int {
+	if x := a.uQpParseInt(values, key); x != nil {
+		return *x
+	}
+	return 0
+}
+
 func (a *St) uQpParseString(values url.Values, key string) *string {
 	if qp, ok := values[key]; ok {
 		return &(qp[0])
 	}
 	return nil
+}
+
+func (a *St) uQpParseStringV(values url.Values, key string) string {
+	if x := a.uQpParseString(values, key); x != nil {
+		return *x
+	}
+	return ""
 }
 
 func (a *St) uQpParseTime(values url.Values, key string) *time.Time {
@@ -182,4 +210,11 @@ func (a *St) uQpParseInt64Slice(values url.Values, key string) *[]int64 {
 	}
 
 	return nil
+}
+
+func (a *St) uQpParseInt64SliceV(values url.Values, key string) []int64 {
+	if x := a.uQpParseInt64Slice(values, key); x != nil {
+		return *x
+	}
+	return []int64{}
 }
