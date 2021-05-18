@@ -9,6 +9,12 @@ import (
 func (a *St) router() http.Handler {
 	r := mux.NewRouter()
 
+	// dic
+	r.HandleFunc("/dic", a.hDicGet).Methods("GET")
+
+	// config
+	r.HandleFunc("/config", a.hConfigUpdate).Methods("PUT")
+
 	// profile
 	r.HandleFunc("/profile/send_validating_code", a.hProfileSendPhoneValidatingCode).Methods("POST")
 	r.HandleFunc("/profile/auth", a.hProfileAuth).Methods("POST")

@@ -7,7 +7,6 @@ import (
 	"github.com/rendau/gms_temp/internal/cns"
 	"github.com/rendau/gms_temp/internal/domain/entities"
 	"github.com/rendau/gms_temp/internal/domain/errs"
-	"github.com/rendau/gms_temp/internal/domain/util"
 	"github.com/stretchr/testify/require"
 )
 
@@ -15,18 +14,29 @@ func resetDb() {
 	var err error
 
 	truncateTables([]string{
-		"usr",
+		"cfg", "usr",
 	})
 
 	bgCtx := context.Background()
 
-	admId, err = app.core.Usr.Create(bgCtx, &entities.UsrCUSt{
-		TypeId: util.NewInt(cns.UsrTypeAdmin),
-		Phone:  &admPhone,
-		Name:   &admName,
-	})
-	if err != nil {
-		app.lg.Fatal(err)
+	usrs := []struct {
+		IdPtr  *int64
+		Name   string
+		Phone  string
+		TypeId int
+	}{
+		{&admId, admName, admPhone, cns.UsrTypeAdmin},
+		{&usr1Id, usr1Name, usr1Phone, cns.UsrTypeUndefined},
+	}
+	for _, usr := range usrs {
+		*usr.IdPtr, err = app.core.Usr.Create(bgCtx, &entities.UsrCUSt{
+			TypeId: &usr.TypeId,
+			Name:   &usr.Name,
+			Phone:  &usr.Phone,
+		})
+		if err != nil {
+			app.lg.Fatal(err)
+		}
 	}
 }
 
@@ -48,11 +58,13 @@ func prepareDbForNewTest() {
 
 	app.cache.Clean()
 
-	truncateTables([]string{})
+	truncateTables([]string{
+		"cfg",
+	})
 
 	_, err = app.db.DbExec(context.Background(), `
 		delete from usr where id not in (select * from unnest($1 :: bigint[]))
-	`, []int64{admId})
+	`, []int64{admId, usr1Id})
 	if err != nil {
 		app.lg.Fatal(err)
 	}

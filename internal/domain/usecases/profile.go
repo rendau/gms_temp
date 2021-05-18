@@ -3,7 +3,9 @@ package usecases
 import (
 	"context"
 
+	"github.com/rendau/gms_temp/internal/cns"
 	"github.com/rendau/gms_temp/internal/domain/entities"
+	"github.com/rendau/gms_temp/internal/domain/util"
 )
 
 func (u *St) ProfileSendPhoneValidatingCode(ctx context.Context,
@@ -28,7 +30,7 @@ func (u *St) ProfileSendPhoneValidatingCode(ctx context.Context,
 }
 
 func (u *St) ProfileAuth(ctx context.Context,
-	obj *entities.UsrAuthReqSt) (int64, string, error) {
+	obj *entities.PhoneAndSmsCodeSt) (int64, string, error) {
 	var err error
 
 	if ctx, err = u.db.ContextWithTransaction(ctx); err != nil {
@@ -37,6 +39,30 @@ func (u *St) ProfileAuth(ctx context.Context,
 	defer func() { u.db.RollbackContextTransaction(ctx) }()
 
 	id, token, err := u.cr.Usr.Auth(ctx, obj)
+	if err != nil {
+		return 0, "", err
+	}
+
+	if err = u.db.CommitContextTransaction(ctx); err != nil {
+		return 0, "", err
+	}
+
+	return id, token, nil
+}
+
+func (u *St) ProfileReg(ctx context.Context,
+	obj *entities.UsrRegReqSt) (int64, string, error) {
+	var err error
+
+	// restrict
+	obj.TypeId = util.NewInt(cns.UsrTypeUndefined)
+
+	if ctx, err = u.db.ContextWithTransaction(ctx); err != nil {
+		return 0, "", err
+	}
+	defer func() { u.db.RollbackContextTransaction(ctx) }()
+
+	id, token, err := u.cr.Usr.Reg(ctx, obj)
 	if err != nil {
 		return 0, "", err
 	}
@@ -83,21 +109,7 @@ func (u *St) ProfileGet(ctx context.Context) (*entities.UsrProfileSt, error) {
 		return nil, err
 	}
 
-	if ctx, err = u.db.ContextWithTransaction(ctx); err != nil {
-		return nil, err
-	}
-	defer func() { u.db.RollbackContextTransaction(ctx) }()
-
-	result, err := u.cr.Usr.GetProfile(ctx, ses.ID)
-	if err != nil {
-		return nil, err
-	}
-
-	if err = u.db.CommitContextTransaction(ctx); err != nil {
-		return nil, err
-	}
-
-	return result, nil
+	return u.cr.Usr.GetProfile(ctx, ses.ID)
 }
 
 func (u *St) ProfileUpdate(ctx context.Context,
@@ -120,6 +132,33 @@ func (u *St) ProfileUpdate(ctx context.Context,
 	obj.Phone = nil
 
 	err = u.cr.Usr.Update(ctx, ses.ID, obj)
+	if err != nil {
+		return err
+	}
+
+	if err = u.db.CommitContextTransaction(ctx); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (u *St) ProfileChangePhone(ctx context.Context,
+	obj *entities.PhoneAndSmsCodeSt) error {
+	var err error
+
+	ses := u.ContextGetSession(ctx)
+
+	if err = u.SessionRequireAuth(ses); err != nil {
+		return err
+	}
+
+	if ctx, err = u.db.ContextWithTransaction(ctx); err != nil {
+		return err
+	}
+	defer func() { u.db.RollbackContextTransaction(ctx) }()
+
+	err = u.cr.Usr.ChangePhone(ctx, ses.ID, obj)
 	if err != nil {
 		return err
 	}

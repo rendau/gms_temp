@@ -24,4 +24,8 @@ var (
 	admId    int64
 	admName  = "Admin"
 	admPhone = "70000000001"
+
+	usr1Id    int64
+	usr1Name  = "Usr1"
+	usr1Phone = "75550000001"
 )

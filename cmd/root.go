@@ -59,7 +59,7 @@ func Execute() {
 	}
 
 	if viper.GetString("ms_sms_url") == "" {
-		app.sms = smsMock.New()
+		app.sms = smsMock.New(true)
 	} else {
 		app.sms = smsc.New(
 			app.lg,
@@ -88,6 +88,7 @@ func Execute() {
 		app.sms,
 		app.ws,
 		debug,
+		false,
 	)
 
 	app.ucs = usecases.New(

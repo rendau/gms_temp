@@ -24,12 +24,29 @@ func (a *St) hProfileSendPhoneValidatingCode(w http.ResponseWriter, r *http.Requ
 }
 
 func (a *St) hProfileAuth(w http.ResponseWriter, r *http.Request) {
-	reqObj := &entities.UsrAuthReqSt{}
+	reqObj := &entities.PhoneAndSmsCodeSt{}
 	if !a.uParseRequestJSON(w, r, reqObj) {
 		return
 	}
 
 	usrId, token, err := a.ucs.ProfileAuth(a.uGetRequestContext(r), reqObj)
+	if a.uHandleError(err, r, w) {
+		return
+	}
+
+	a.uRespondJSON(w, 0, struct {
+		Id    int64  `json:"id"`
+		Token string `json:"token"`
+	}{usrId, token})
+}
+
+func (a *St) hProfileReg(w http.ResponseWriter, r *http.Request) {
+	reqObj := &entities.UsrRegReqSt{}
+	if !a.uParseRequestJSON(w, r, reqObj) {
+		return
+	}
+
+	usrId, token, err := a.ucs.ProfileReg(a.uGetRequestContext(r), reqObj)
 	if a.uHandleError(err, r, w) {
 		return
 	}
@@ -65,6 +82,20 @@ func (a *St) hProfileUpdate(w http.ResponseWriter, r *http.Request) {
 	}
 
 	err := a.ucs.ProfileUpdate(a.uGetRequestContext(r), reqObj)
+	if a.uHandleError(err, r, w) {
+		return
+	}
+
+	w.WriteHeader(200)
+}
+
+func (a *St) hProfileChangePhone(w http.ResponseWriter, r *http.Request) {
+	reqObj := &entities.PhoneAndSmsCodeSt{}
+	if !a.uParseRequestJSON(w, r, &reqObj) {
+		return
+	}
+
+	err := a.ucs.ProfileChangePhone(a.uGetRequestContext(r), reqObj)
 	if a.uHandleError(err, r, w) {
 		return
 	}

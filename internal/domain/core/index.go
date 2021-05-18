@@ -11,6 +11,12 @@ type St struct {
 	sms        interfaces.Sms
 	ws         interfaces.Ws
 	noSmsCheck bool
+	testing    bool
+
+	Config *Config
+
+	Dic     *Dic
+	UsrType *UsrType
 
 	Session *Session
 	Usr     *Usr
@@ -23,6 +29,7 @@ func New(
 	sms interfaces.Sms,
 	ws interfaces.Ws,
 	noSmsCheck bool,
+	testing bool,
 ) *St {
 	c := &St{
 		lg:         lg,
@@ -31,7 +38,13 @@ func New(
 		sms:        sms,
 		ws:         ws,
 		noSmsCheck: noSmsCheck,
+		testing:    testing,
 	}
+
+	c.Config = NewConfig(c)
+
+	c.Dic = NewDic(c)
+	c.UsrType = NewUsrType(c)
 
 	c.Session = NewSession(c)
 	c.Usr = NewUsr(c)

@@ -112,26 +112,28 @@ func (c *Usr) SendPhoneValidatingCode(ctx context.Context, phone string, errNE b
 		return err
 	}
 
-	c.r.lg.Infow("Sms sent", "phone", phone, "sms_code", smsCode)
+	if !c.r.testing {
+		c.r.lg.Infow("Sms sent", "phone", phone, "sms_code", smsCode)
+	}
 
 	return nil
 }
 
-func (c *Usr) CheckPhoneValidatingCode(ctx context.Context, phone string, smsCode int) error {
+func (c *Usr) CheckPhoneValidatingCode(ctx context.Context, obj *entities.PhoneAndSmsCodeSt) error {
 	if c.r.noSmsCheck {
 		return nil
 	}
 
 	// check if phone is sms free
-	if staticCode, ok := smsFreePhones[phone]; ok {
+	if staticCode, ok := smsFreePhones[obj.Phone]; ok {
 		if staticCode == 0 {
 			return nil
-		} else if smsCode != staticCode {
+		} else if obj.SmsCode != staticCode {
 			return errs.WrongSmsCode
 		}
 	}
 
-	var cacheKey = fmt.Sprintf(unValidateCacheKeyTmpl, phone)
+	var cacheKey = fmt.Sprintf(unValidateCacheKeyTmpl, obj.Phone)
 	var cacheValue usrUNValidatingCacheSt
 
 	ok, err := c.r.cache.GetJsonObj(cacheKey, &cacheValue)
@@ -144,7 +146,7 @@ func (c *Usr) CheckPhoneValidatingCode(ctx context.Context, phone string, smsCod
 
 	smsCodeFound := false
 	for _, code := range cacheValue.Codes {
-		if code == smsCode {
+		if code == obj.SmsCode {
 			smsCodeFound = true
 			break
 		}
@@ -309,7 +311,7 @@ func (c *Usr) GetIdForPhone(ctx context.Context, phone string, errNE bool) (int6
 	return id, nil
 }
 
-func (c *Usr) Auth(ctx context.Context, obj *entities.UsrAuthReqSt) (int64, string, error) {
+func (c *Usr) Auth(ctx context.Context, obj *entities.PhoneAndSmsCodeSt) (int64, string, error) {
 	var err error
 
 	obj.Phone, err = c.ValidatePhone(obj.Phone)
@@ -317,7 +319,7 @@ func (c *Usr) Auth(ctx context.Context, obj *entities.UsrAuthReqSt) (int64, stri
 		return 0, "", err
 	}
 
-	err = c.CheckPhoneValidatingCode(ctx, obj.Phone, obj.SmsCode)
+	err = c.CheckPhoneValidatingCode(ctx, obj)
 	if err != nil {
 		return 0, "", err
 	}
@@ -354,14 +356,14 @@ func (c *Usr) AuthByToken(ctx context.Context, token string) (int64, error) {
 	return id, nil
 }
 
-func (c *Usr) Reg(ctx context.Context, data *entities.UsrRegisterSt) (int64, string, error) {
+func (c *Usr) Reg(ctx context.Context, data *entities.UsrRegReqSt) (int64, string, error) {
 	var err error
 
 	if data.Phone, err = c.ValidatePhone(data.Phone); err != nil {
 		return 0, "", err
 	}
 
-	err = c.CheckPhoneValidatingCode(ctx, data.Phone, data.SmsCode)
+	err = c.CheckPhoneValidatingCode(ctx, &data.PhoneAndSmsCodeSt)
 	if err != nil {
 		return 0, "", err
 	}
@@ -485,22 +487,31 @@ func (c *Usr) Update(ctx context.Context, id int64, obj *entities.UsrCUSt) error
 	return nil
 }
 
-func (c *Usr) ChangePhone(ctx context.Context, id int64, phone string, smsCode int) error {
+func (c *Usr) ChangePhone(ctx context.Context, id int64, obj *entities.PhoneAndSmsCodeSt) error {
 	var err error
 
-	phone, err = c.ValidatePhone(phone)
+	obj.Phone, err = c.ValidatePhone(obj.Phone)
 	if err != nil {
 		return err
 	}
 
-	err = c.CheckPhoneValidatingCode(ctx, phone, smsCode)
+	err = c.CheckPhoneValidatingCode(ctx, obj)
 	if err != nil {
 		return err
 	}
 
-	return c.Update(ctx, id, &entities.UsrCUSt{
-		Phone: &phone,
+	err = c.Update(ctx, id, &entities.UsrCUSt{
+		Phone: &obj.Phone,
 	})
+	if err != nil {
+		return err
+	}
+
+	c.r.Session.Delete(id)
+
+	c.RemovePhoneValidatingCache(ctx, obj.Phone)
+
+	return nil
 }
 
 func (c *Usr) Logout(ctx context.Context, id int64) error {

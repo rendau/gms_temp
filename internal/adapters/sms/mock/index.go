@@ -8,6 +8,8 @@ import (
 )
 
 type St struct {
+	traceMsg bool
+
 	q             []Req
 	mu            sync.Mutex
 	smsCodeRegexp *regexp.Regexp
@@ -18,8 +20,10 @@ type Req struct {
 	Msg    string
 }
 
-func New() *St {
+func New(traceMsg bool) *St {
 	return &St{
+		traceMsg: traceMsg,
+
 		q:             make([]Req, 0),
 		smsCodeRegexp: regexp.MustCompile(`([0-9]{4})`),
 	}
@@ -34,7 +38,9 @@ func (m *St) Send(phones string, msg string) bool {
 		Msg:    msg,
 	}
 
-	fmt.Printf("sms: %+v\n", req)
+	if m.traceMsg {
+		fmt.Printf("sms: %+v\n", req)
+	}
 
 	m.q = append(m.q, req)
 

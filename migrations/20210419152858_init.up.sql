@@ -35,9 +35,6 @@ do
 $$
     declare
     begin
-        -- cfg row
-        insert into cfg (v) values ('{}');
-
         -- Admin user
         insert into usr(type_id, phone, name)
         values (1, '70000000000', 'Admin');

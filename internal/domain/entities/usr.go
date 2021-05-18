@@ -48,14 +48,13 @@ type UsrCUSt struct {
 	Name   *string `json:"name"`
 }
 
-type UsrAuthReqSt struct {
+type PhoneAndSmsCodeSt struct {
 	Phone   string `json:"phone"`
 	SmsCode int    `json:"sms_code"`
 }
 
-type UsrRegisterSt struct {
-	Phone   string `json:"phone"`
-	SmsCode int    `json:"sms_code"`
+type UsrRegReqSt struct {
+	PhoneAndSmsCodeSt
 
 	TypeId *int    `json:"type_id"`
 	Name   *string `json:"name"`

@@ -40,7 +40,7 @@ func TestMain(m *testing.M) {
 		app.lg.Fatal(err)
 	}
 
-	app.sms = smsMock.New()
+	app.sms = smsMock.New(false)
 
 	app.ws = wsMock.New()
 
@@ -51,6 +51,7 @@ func TestMain(m *testing.M) {
 		app.sms,
 		app.ws,
 		false,
+		true,
 	)
 
 	app.ucs = usecases.New(

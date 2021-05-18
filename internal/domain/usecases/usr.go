@@ -3,9 +3,7 @@ package usecases
 import (
 	"context"
 
-	"github.com/rendau/gms_temp/internal/cns"
 	"github.com/rendau/gms_temp/internal/domain/entities"
-	"github.com/rendau/gms_temp/internal/domain/errs"
 	"github.com/rendau/gms_temp/internal/domain/util"
 )
 
@@ -23,21 +21,7 @@ func (u *St) UsrList(ctx context.Context,
 		return nil, 0, err
 	}
 
-	if ctx, err = u.db.ContextWithTransaction(ctx); err != nil {
-		return nil, 0, err
-	}
-	defer func() { u.db.RollbackContextTransaction(ctx) }()
-
-	usrs, totalCnt, err := u.cr.Usr.List(ctx, pars)
-	if err != nil {
-		return nil, 0, err
-	}
-
-	if err = u.db.CommitContextTransaction(ctx); err != nil {
-		return nil, 0, err
-	}
-
-	return usrs, totalCnt, nil
+	return u.cr.Usr.List(ctx, pars)
 }
 
 func (u *St) UsrGet(ctx context.Context,
@@ -50,21 +34,7 @@ func (u *St) UsrGet(ctx context.Context,
 		return nil, err
 	}
 
-	if ctx, err = u.db.ContextWithTransaction(ctx); err != nil {
-		return nil, err
-	}
-	defer func() { u.db.RollbackContextTransaction(ctx) }()
-
-	usr, err := u.cr.Usr.Get(ctx, &entities.UsrGetPars{Id: &id}, true)
-	if err != nil {
-		return nil, err
-	}
-
-	if err = u.db.CommitContextTransaction(ctx); err != nil {
-		return nil, err
-	}
-
-	return usr, nil
+	return u.cr.Usr.Get(ctx, &entities.UsrGetPars{Id: &id}, true)
 }
 
 func (u *St) UsrCreate(ctx context.Context,
@@ -75,10 +45,6 @@ func (u *St) UsrCreate(ctx context.Context,
 
 	if err = u.SessionRequireOneOfTypeIds(ses); err != nil {
 		return 0, err
-	}
-
-	if ses.TypeId != cns.UsrTypeAdmin {
-		return 0, errs.PermissionDenied
 	}
 
 	if ctx, err = u.db.ContextWithTransaction(ctx); err != nil {
@@ -106,10 +72,6 @@ func (u *St) UsrUpdate(ctx context.Context,
 
 	if err = u.SessionRequireOneOfTypeIds(ses); err != nil {
 		return err
-	}
-
-	if ses.TypeId != cns.UsrTypeAdmin {
-		return errs.PermissionDenied
 	}
 
 	if ctx, err = u.db.ContextWithTransaction(ctx); err != nil {
