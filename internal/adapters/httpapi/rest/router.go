@@ -9,6 +9,10 @@ import (
 func (a *St) router() http.Handler {
 	r := mux.NewRouter()
 
+	// docs
+	r.Handle("/doc", http.RedirectHandler("/doc/", http.StatusMovedPermanently))
+	r.PathPrefix("/doc/").Handler(http.StripPrefix("/doc/", http.FileServer(http.Dir("./doc/"))))
+
 	// dic
 	r.HandleFunc("/dic", a.hDicGet).Methods("GET")
 
