@@ -20,4 +20,8 @@ var (
 		core  *core.St
 		ucs   *usecases.St
 	}{}
+
+	admId    int64
+	admName  = "Admin"
+	admPhone = "70000000001"
 )

@@ -2,19 +2,32 @@ package tests
 
 import (
 	"context"
-	"log"
 	"testing"
 
+	"github.com/rendau/gms_temp/internal/cns"
+	"github.com/rendau/gms_temp/internal/domain/entities"
 	"github.com/rendau/gms_temp/internal/domain/errs"
+	"github.com/rendau/gms_temp/internal/domain/util"
 	"github.com/stretchr/testify/require"
 )
 
 func resetDb() {
-	// var err error
-	//
-	// bgCtx := context.Background()
+	var err error
 
-	truncateTables([]string{})
+	truncateTables([]string{
+		"usr",
+	})
+
+	bgCtx := context.Background()
+
+	admId, err = app.core.Usr.Create(bgCtx, &entities.UsrCUSt{
+		TypeId: util.NewInt(cns.UsrTypeAdmin),
+		Phone:  &admPhone,
+		Name:   &admName,
+	})
+	if err != nil {
+		app.lg.Fatal(err)
+	}
 }
 
 func truncateTables(tables []string) {
@@ -31,21 +44,21 @@ func truncateTables(tables []string) {
 }
 
 func prepareDbForNewTest() {
-	// var err error
+	var err error
 
 	app.cache.Clean()
 
 	truncateTables([]string{})
 
-	// _, err = app.db.DbExec(context.Background(), `
-	// 	delete from usr where id not in ($1, $2, $3, $4, $5)
-	// `, admId, usr1Id, usr2Id, usr3Id, usr4Id)
-	// if err != nil {
-	// 	app.log.Fatal(err)
-	// }
+	_, err = app.db.DbExec(context.Background(), `
+		delete from usr where id not in (select * from unnest($1 :: bigint[]))
+	`, []int64{admId})
+	if err != nil {
+		app.lg.Fatal(err)
+	}
 }
 
-func domainErrIsEqual(t *testing.T, v error, expectedErr error, msgArgs ...interface{}) {
+func errIsEqual(t *testing.T, v error, expectedErr error, msgArgs ...interface{}) {
 	if expectedErr == nil {
 		require.Nil(t, v, msgArgs...)
 	} else {
@@ -55,20 +68,18 @@ func domainErrIsEqual(t *testing.T, v error, expectedErr error, msgArgs ...inter
 		case errs.Err:
 			require.Equal(t, expectedErr.Error(), cErr.Error(), msgArgs...)
 		default:
-			t.Fatal("bad error type: " + v.Error())
+			app.lg.Fatalw("bad error type", v)
 		}
 	}
 }
 
-func ctxWithSes(ctx context.Context, usrId int64) context.Context {
+func ctxWithSes(t *testing.T, ctx context.Context, usrId int64) context.Context {
 	if ctx == nil {
 		ctx = context.Background()
 	}
 
 	token, err := app.core.Usr.GetOrCreateToken(ctx, usrId)
-	if err != nil {
-		log.Fatalln(err.Error())
-	}
+	require.Nil(t, err)
 
 	return app.ucs.ContextWithSession(ctx, app.ucs.SessionGet(ctx, token))
 }

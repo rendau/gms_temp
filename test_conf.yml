@@ -1,2 +1,0 @@
-pg:
-  dsn: postgres://localhost:5432/cg_test?sslmode=disable

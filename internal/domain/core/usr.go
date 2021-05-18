@@ -22,6 +22,7 @@ const (
 
 var (
 	smsFreePhones = map[string]int{ // phone and static code, code 0 - mean any code
+		"70000000000": 7000,
 	}
 )
 

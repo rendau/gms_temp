@@ -2,7 +2,6 @@ package pg
 
 import (
 	"context"
-	"database/sql"
 	"strconv"
 	"strings"
 
@@ -242,7 +241,7 @@ func (d *St) UsrGetIdForToken(ctx context.Context, token string) (int64, error) 
 		where token = $1
 	`, token).Scan(&result)
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if err == pgx.ErrNoRows {
 			return 0, nil
 		}
 
@@ -291,7 +290,7 @@ func (d *St) UsrGetIdForPhone(ctx context.Context, phone string) (int64, error) 
 			where phone = $1
 	`, phone).Scan(&result)
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if err == pgx.ErrNoRows {
 			return 0, nil
 		}
 
