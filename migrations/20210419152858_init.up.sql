@@ -16,6 +16,7 @@ create table usr
     created_at timestamptz not null default now(),
     type_id    smallint    not null default 0,
     phone      text        not null,
+    ava        text        not null default '',
     name       text        not null default '',
     token      text        not null default '',
 

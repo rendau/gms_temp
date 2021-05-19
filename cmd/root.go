@@ -79,7 +79,7 @@ func Execute() {
 		)
 	}
 
-	app.db, err = pg.New(app.lg, viper.GetString("pg.dsn"), debug)
+	app.db, err = pg.New(app.lg, viper.GetString("pg_dsn"), debug)
 	if err != nil {
 		app.lg.Fatal(err)
 	}
@@ -191,7 +191,8 @@ func loadConf() {
 
 	viper.AutomaticEnv()
 
-	// viper.Set("some.url", uriRPadSlash(viper.GetString("some.url")))
+	viper.Set("ms_sms_url", uriRPadSlash(viper.GetString("ms_sms_url")))
+	viper.Set("ms_ws_url", uriRPadSlash(viper.GetString("ms_ws_url")))
 }
 
 func uriRPadSlash(uri string) string {

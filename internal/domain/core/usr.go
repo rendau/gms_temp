@@ -259,9 +259,14 @@ func (c *Usr) GenerateAndSaveToken(ctx context.Context, id int64) (string, error
 }
 
 func (c *Usr) SetToken(ctx context.Context, id int64, v string) error {
+	err := c.r.db.UsrSetToken(ctx, id, v)
+	if err != nil {
+		return err
+	}
+
 	c.r.Session.Delete(id)
 
-	return c.r.db.UsrSetToken(ctx, id, v)
+	return nil
 }
 
 func (c *Usr) ResetToken(ctx context.Context, id int64) error {
@@ -379,6 +384,7 @@ func (c *Usr) Reg(ctx context.Context, data *entities.UsrRegReqSt) (int64, strin
 	id, err = c.Create(ctx, &entities.UsrCUSt{
 		TypeId: data.TypeId,
 		Phone:  &data.Phone,
+		Ava:    data.Ava,
 		Name:   data.Name,
 	})
 	if err != nil {
@@ -471,6 +477,17 @@ func (c *Usr) GetProfile(ctx context.Context, id int64) (*entities.UsrProfileSt,
 	return res, nil
 }
 
+func (c *Usr) GetNumbers(ctx context.Context, id int64) (*entities.UsrNumbersSt, error) {
+	result := &entities.UsrNumbersSt{}
+
+	// result.NewMsgCount, err = c.r.GetNewMsgCount(ctx, id)
+	// if err != nil {
+	// 	return nil, err
+	// }
+
+	return result, nil
+}
+
 func (c *Usr) Update(ctx context.Context, id int64, obj *entities.UsrCUSt) error {
 	err := c.ValidateCU(ctx, obj, id)
 	if err != nil {
@@ -506,8 +523,6 @@ func (c *Usr) ChangePhone(ctx context.Context, id int64, obj *entities.PhoneAndS
 	if err != nil {
 		return err
 	}
-
-	c.r.Session.Delete(id)
 
 	c.RemovePhoneValidatingCache(ctx, obj.Phone)
 

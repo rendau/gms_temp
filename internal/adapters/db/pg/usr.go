@@ -29,6 +29,11 @@ func (d *St) UsrList(ctx context.Context, pars *entities.UsrListParsSt) ([]*enti
 		qWhere += ` and u.type_id = ${type_id}`
 	}
 
+	if pars.TypeIds != nil {
+		args["type_ids"] = *pars.TypeIds
+		qWhere += ` and u.type_id in (select * from unnest(${type_ids} :: bigint[]))`
+	}
+
 	if pars.Search != nil && *pars.Search != "" {
 		for wordI, word := range strings.Split(*pars.Search, " ") {
 			if word != "" {
@@ -65,6 +70,7 @@ func (d *St) UsrList(ctx context.Context, pars *entities.UsrListParsSt) ([]*enti
 			, u.created_at
 			, u.type_id
 			, u.phone
+			, u.ava
 			, u.name
 	`
 
@@ -95,6 +101,7 @@ func (d *St) UsrList(ctx context.Context, pars *entities.UsrListParsSt) ([]*enti
 			&rec.CreatedAt,
 			&rec.TypeId,
 			&rec.Phone,
+			&rec.Ava,
 			&rec.Name,
 		)
 		if err != nil {
@@ -138,6 +145,7 @@ func (d *St) UsrGet(ctx context.Context, pars *entities.UsrGetPars) (*entities.U
 			, u.created_at
 			, u.type_id
 			, u.phone
+			, u.ava
 			, u.name
 		from `+qFrom+`
 		where `+qWhere+`
@@ -147,6 +155,7 @@ func (d *St) UsrGet(ctx context.Context, pars *entities.UsrGetPars) (*entities.U
 		&usr.CreatedAt,
 		&usr.TypeId,
 		&usr.Phone,
+		&usr.Ava,
 		&usr.Name,
 	)
 	if err != nil {
@@ -376,6 +385,10 @@ func (d *St) UsrGetCUArgs(obj *entities.UsrCUSt) (map[string]interface{}, error)
 		result["phone"] = *obj.Phone
 	}
 
+	if obj.Ava != nil {
+		result["ava"] = *obj.Ava
+	}
+
 	if obj.Name != nil {
 		result["name"] = *obj.Name
 	}
@@ -390,4 +403,35 @@ func (d *St) UsrDelete(ctx context.Context, id int64) error {
 	}
 
 	return nil
+}
+
+func (d *St) UsrFilterUnusedFiles(ctx context.Context, src []string) ([]string, error) {
+	rows, err := d.DbQuery(ctx, `
+		select x.a
+		from unnest($1 :: text[]) x(a)
+			left join usr y on y.ava = x.a
+		where y.ava is null
+	`, src)
+	if err != nil {
+		return nil, d.handleError(ctx, err)
+	}
+	defer rows.Close()
+
+	result := make([]string, 0)
+
+	var v string
+
+	for rows.Next() {
+		err = rows.Scan(&v)
+		if err != nil {
+			return nil, d.handleError(ctx, err)
+		}
+
+		result = append(result, v)
+	}
+	if err = rows.Err(); err != nil {
+		return nil, d.handleError(ctx, err)
+	}
+
+	return result, nil
 }

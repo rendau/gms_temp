@@ -4,7 +4,8 @@ http_listen: ":5050"
 metrics: false
 redis:
   url:
-  password:
+  psw:
   db: 0
-pg:
-  dsn: postgres://user:pass@host:5432/dbname?sslmode=disable
+pg_dsn: postgres://user:pass@host:5432/dbname?sslmode=disable
+ms_sms_url:
+ms_ws_url:

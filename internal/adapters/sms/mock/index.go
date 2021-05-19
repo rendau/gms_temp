@@ -33,6 +33,10 @@ func (m *St) Send(phones string, msg string) bool {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
+	if len(m.q) > 100 {
+		m.q = make([]Req, 0)
+	}
+
 	req := Req{
 		Phones: phones,
 		Msg:    msg,

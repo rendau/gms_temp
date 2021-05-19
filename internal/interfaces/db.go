@@ -31,4 +31,5 @@ type Db interface {
 	UsrCreate(ctx context.Context, obj *entities.UsrCUSt) (int64, error)
 	UsrUpdate(ctx context.Context, id int64, obj *entities.UsrCUSt) error
 	UsrDelete(ctx context.Context, id int64) error
+	UsrFilterUnusedFiles(ctx context.Context, src []string) ([]string, error)
 }

@@ -24,8 +24,10 @@ type St struct {
 	Dic     *Dic
 	UsrType *UsrType
 
-	Session *Session
-	Usr     *Usr
+	System       *System
+	Notification *Notification
+	Session      *Session
+	Usr          *Usr
 }
 
 func New(
@@ -52,6 +54,8 @@ func New(
 	c.Dic = NewDic(c)
 	c.UsrType = NewUsrType(c)
 
+	c.System = NewSystem(c)
+	c.Notification = NewNotification(c)
 	c.Session = NewSession(c)
 	c.Usr = NewUsr(c)
 
@@ -66,11 +70,4 @@ func (c *St) StopAndWaitJobs() {
 	c.stopMu.Unlock()
 
 	c.wg.Wait()
-}
-
-func (c *St) IsStopped() bool {
-	c.stopMu.RLock()
-	defer c.stopMu.RUnlock()
-
-	return c.stop
 }

@@ -2,5 +2,4 @@ debug: true
 log_level: "info"
 http_listen: ":9090"
 metrics: false
-pg:
-  dsn: postgres://localhost:5432/gms_temp?sslmode=disable
+pg_dsn: postgres://localhost:5432/gms_temp?sslmode=disable

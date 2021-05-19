@@ -211,6 +211,7 @@ func TestReg(t *testing.T) {
 				Phone:   "73330000045",
 				SmsCode: smsCode,
 			},
+			Ava:  util.NewString("/path_to_ava"),
 			Name: util.NewString("Name"),
 		},
 	)
@@ -224,10 +225,11 @@ func TestReg(t *testing.T) {
 	require.Equal(t, id, profile.Id)
 	require.Equal(t, "73330000045", profile.Phone)
 	require.Equal(t, cns.UsrTypeUndefined, profile.TypeId)
+	require.Equal(t, "/path_to_ava", profile.Ava)
 	require.Equal(t, "Name", profile.Name)
 }
 
-func TestGetProfile(t *testing.T) {
+func TestProfileGet(t *testing.T) {
 	prepareDbForNewTest()
 
 	bgCtx := context.Background()
@@ -244,7 +246,7 @@ func TestGetProfile(t *testing.T) {
 	require.Equal(t, admName, profile.Name)
 }
 
-func TestChangePhone(t *testing.T) {
+func TestPhoneChange(t *testing.T) {
 	prepareDbForNewTest()
 
 	bgCtx := context.Background()

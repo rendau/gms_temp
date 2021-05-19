@@ -30,6 +30,13 @@ func (a *St) router() http.Handler {
 	r.Handle("/doc", http.RedirectHandler("/doc/", http.StatusMovedPermanently))
 	r.PathPrefix("/doc/").Handler(http.StripPrefix("/doc/", http.FileServer(http.Dir("./doc/"))))
 
+	// system
+	r.HandleFunc("/mss/sms/balance/alarm", a.hSystemSmsBalanceAlarm).Methods("POST")
+	r.HandleFunc("/mss/fs/filter_unused_files", a.hSystemFilterUnusedFiles).Methods("PUT")
+	r.HandleFunc("/mss/cron/tick5m", a.hSystemCronTick5m).Methods("GET")
+	r.HandleFunc("/mss/cron/tick15m", a.hSystemCronTick15m).Methods("GET")
+	r.HandleFunc("/mss/cron/tick30m", a.hSystemCronTick30m).Methods("GET")
+
 	// dic
 	r.Handle("/dic", mh(a.hDicGet, "/dic")).Methods("GET")
 
@@ -42,6 +49,7 @@ func (a *St) router() http.Handler {
 	r.Handle("/profile/reg", mh(a.hProfileReg, "/profile/reg")).Methods("POST")
 	r.Handle("/profile/logout", mh(a.hProfileLogout, "/profile/logout")).Methods("POST")
 	r.Handle("/profile", mh(a.hProfileGet, "/profile")).Methods("GET")
+	r.Handle("/profile/numbers", mh(a.hProfileGetNumbers, "/profile/numbers")).Methods("GET")
 	r.Handle("/profile", mh(a.hProfileUpdate, "/profile")).Methods("PUT")
 	r.Handle("/profile/change_phone", mh(a.hProfileChangePhone, "/profile/change_phone")).Methods("PUT")
 	r.Handle("/profile/id", mh(a.hProfileGetId, "/profile/id")).Methods("GET")

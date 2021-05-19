@@ -28,6 +28,10 @@ func (m *St) Send2Users(usrIds []int64, data map[string]string) bool {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
+	if len(m.q) > 1000 {
+		m.q = make([]Req, 0)
+	}
+
 	req := Req{
 		UsrIds: usrIds,
 		Data:   data,

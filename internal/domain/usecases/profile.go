@@ -112,6 +112,18 @@ func (u *St) ProfileGet(ctx context.Context) (*entities.UsrProfileSt, error) {
 	return u.cr.Usr.GetProfile(ctx, ses.ID)
 }
 
+func (u *St) ProfileGetNumbers(ctx context.Context) (*entities.UsrNumbersSt, error) {
+	var err error
+
+	ses := u.ContextGetSession(ctx)
+
+	if err = u.SessionRequireAuth(ses); err != nil {
+		return nil, err
+	}
+
+	return u.cr.Usr.GetNumbers(ctx, ses.ID)
+}
+
 func (u *St) ProfileUpdate(ctx context.Context,
 	obj *entities.UsrCUSt) error {
 	var err error

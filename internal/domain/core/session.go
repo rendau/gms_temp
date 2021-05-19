@@ -51,6 +51,8 @@ func (c *Session) Get(ctx context.Context, token string) *entities.Session {
 
 func (c *Session) Delete(id int64) {
 	c.deleteUsrIdFromCache(id)
+
+	c.r.Notification.SendRefreshProfile([]int64{id})
 }
 
 func (c *Session) getFromCache(key string) *entities.Session {

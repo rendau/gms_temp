@@ -75,6 +75,15 @@ func (a *St) hProfileGet(w http.ResponseWriter, r *http.Request) {
 	a.uRespondJSON(w, 0, profile)
 }
 
+func (a *St) hProfileGetNumbers(w http.ResponseWriter, r *http.Request) {
+	result, err := a.ucs.ProfileGetNumbers(a.uGetRequestContext(r))
+	if a.uHandleError(err, r, w) {
+		return
+	}
+
+	a.uRespondJSON(w, 0, result)
+}
+
 func (a *St) hProfileUpdate(w http.ResponseWriter, r *http.Request) {
 	reqObj := &entities.UsrCUSt{}
 	if !a.uParseRequestJSON(w, r, reqObj) {
