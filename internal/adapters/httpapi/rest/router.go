@@ -26,7 +26,7 @@ func (a *St) router() http.Handler {
 		}
 	}
 
-	// docs
+	// doc
 	r.Handle("/doc", http.RedirectHandler("/doc/", http.StatusMovedPermanently))
 	r.PathPrefix("/doc/").Handler(http.StripPrefix("/doc/", http.FileServer(http.Dir("./doc/"))))
 
