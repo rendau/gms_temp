@@ -4,35 +4,54 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
+	"github.com/slok/go-http-metrics/metrics/prometheus"
+	"github.com/slok/go-http-metrics/middleware"
+	mmStd "github.com/slok/go-http-metrics/middleware/std"
 )
 
 func (a *St) router() http.Handler {
 	r := mux.NewRouter()
+
+	mh := func(h http.HandlerFunc, id string) http.Handler {
+		return h
+	}
+
+	if a.withMetrics {
+		mm := middleware.New(middleware.Config{
+			Recorder: prometheus.NewRecorder(prometheus.Config{}),
+		})
+
+		mh = func(h http.HandlerFunc, id string) http.Handler {
+			return mmStd.Handler(id, mm, h)
+		}
+	}
 
 	// docs
 	r.Handle("/doc", http.RedirectHandler("/doc/", http.StatusMovedPermanently))
 	r.PathPrefix("/doc/").Handler(http.StripPrefix("/doc/", http.FileServer(http.Dir("./doc/"))))
 
 	// dic
-	r.HandleFunc("/dic", a.hDicGet).Methods("GET")
+	r.Handle("/dic", mh(a.hDicGet, "/dic")).Methods("GET")
 
 	// config
 	r.HandleFunc("/config", a.hConfigUpdate).Methods("PUT")
 
 	// profile
-	r.HandleFunc("/profile/send_validating_code", a.hProfileSendPhoneValidatingCode).Methods("POST")
-	r.HandleFunc("/profile/auth", a.hProfileAuth).Methods("POST")
-	r.HandleFunc("/profile/logout", a.hProfileLogout).Methods("POST")
-	r.HandleFunc("/profile", a.hProfileGet).Methods("GET")
-	r.HandleFunc("/profile", a.hProfileUpdate).Methods("PUT")
-	r.HandleFunc("/profile/id", a.hProfileGetId).Methods("GET")
+	r.Handle("/profile/send_validating_code", mh(a.hProfileSendPhoneValidatingCode, "/profile/send_validating_code")).Methods("POST")
+	r.Handle("/profile/auth", mh(a.hProfileAuth, "/profile/auth")).Methods("POST")
+	r.Handle("/profile/reg", mh(a.hProfileReg, "/profile/reg")).Methods("POST")
+	r.Handle("/profile/logout", mh(a.hProfileLogout, "/profile/logout")).Methods("POST")
+	r.Handle("/profile", mh(a.hProfileGet, "/profile")).Methods("GET")
+	r.Handle("/profile", mh(a.hProfileUpdate, "/profile")).Methods("PUT")
+	r.Handle("/profile/change_phone", mh(a.hProfileChangePhone, "/profile/change_phone")).Methods("PUT")
+	r.Handle("/profile/id", mh(a.hProfileGetId, "/profile/id")).Methods("GET")
 
 	// usrs
-	r.HandleFunc("/usrs", a.hUsrList).Methods("GET")
-	r.HandleFunc("/usrs", a.hUsrCreate).Methods("POST")
-	r.HandleFunc("/usrs/{id:[0-9]+}", a.hUsrGet).Methods("GET")
-	r.HandleFunc("/usrs/{id:[0-9]+}", a.hUsrUpdate).Methods("PUT")
-	r.HandleFunc("/usrs/{id:[0-9]+}", a.hUsrDelete).Methods("DELETE")
+	r.Handle("/usrs", mh(a.hUsrList, "/usrs")).Methods("GET")
+	r.Handle("/usrs", mh(a.hUsrCreate, "/usrs")).Methods("POST")
+	r.Handle("/usrs/{id:[0-9]+}", mh(a.hUsrGet, "/usrs/:id")).Methods("GET")
+	r.Handle("/usrs/{id:[0-9]+}", mh(a.hUsrUpdate, "/usrs/:id")).Methods("PUT")
+	r.Handle("/usrs/{id:[0-9]+}", mh(a.hUsrDelete, "/usrs/:id")).Methods("DELETE")
 
 	return a.middleware(r)
 }

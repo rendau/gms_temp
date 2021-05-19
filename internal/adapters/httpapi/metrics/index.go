@@ -1,19 +1,18 @@
-package rest
+package metrics
 
 import (
 	"context"
 	"net/http"
 	"time"
 
-	"github.com/rendau/gms_temp/internal/domain/usecases"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/rendau/gms_temp/internal/interfaces"
 )
 
 type St struct {
-	lg          interfaces.Logger
-	ucs         *usecases.St
-	withMetrics bool
-	eChan       chan<- error
+	lg     interfaces.Logger
+	listen string
+	eChan  chan<- error
 
 	server *http.Server
 }
@@ -21,22 +20,19 @@ type St struct {
 func New(
 	lg interfaces.Logger,
 	listen string,
-	ucs *usecases.St,
-	withMetrics bool,
 	eChan chan<- error,
 ) *St {
 	api := &St{
-		lg:          lg,
-		ucs:         ucs,
-		withMetrics: withMetrics,
-		eChan:       eChan,
+		lg:     lg,
+		listen: listen,
+		eChan:  eChan,
 	}
 
 	api.server = &http.Server{
-		Addr:              listen,
-		Handler:           api.router(),
-		ReadTimeout:       2 * time.Minute,
-		ReadHeaderTimeout: 10 * time.Second,
+		Addr:         listen,
+		Handler:      promhttp.Handler(),
+		ReadTimeout:  2 * time.Minute,
+		WriteTimeout: 20 * time.Second,
 	}
 
 	return api

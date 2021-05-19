@@ -1,6 +1,7 @@
 debug: true
 log_level: "info"
 http_listen: ":5050"
+metrics: false
 redis:
   url:
   password:
