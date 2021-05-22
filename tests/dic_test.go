@@ -50,7 +50,7 @@ func TestDic(t *testing.T) {
 	require.NotNil(t, dicJson)
 	require.NotEmpty(t, dicJson)
 
-	dic := &entities.DicSt{}
+	dic := &entities.DicDataSt{}
 
 	err = json.Unmarshal(dicJson, dic)
 	require.Nil(t, err)

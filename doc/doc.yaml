@@ -18,7 +18,7 @@ definitions:
         $ref: '#/definitions/ConfigContactsSt'
     type: object
     x-go-package: github.com/rendau/gms_temp/internal/domain/entities
-  DicSt:
+  DicDataSt:
     properties:
       config:
         $ref: '#/definitions/ConfigSt'
@@ -29,6 +29,13 @@ definitions:
         x-go-name: UsrTypes
     type: object
     x-go-package: github.com/rendau/gms_temp/internal/domain/entities
+  ErrRepSt:
+    properties:
+      error_code:
+        type: string
+        x-go-name: ErrorCode
+    type: object
+    x-go-package: github.com/rendau/gms_temp/internal/adapters/httpapi/rest
   UsrTypeSt:
     properties:
       id:
@@ -43,45 +50,52 @@ definitions:
 host: gms_temp.kz
 info:
   description: |-
-    <br/>
-    В каждом авторизованном запросе необходимо указать http-заголовок:
+    <br/><details>
+    <summary>**Константы**</summary>
     ```
-    Authorization: token
-    ```
-    token можно получить:
-    + в ответе авторизации (/profile/auth)
-    + в ответе регистрации (/profile/reg)
-    <br/>
-    ### Константы
-    ```
-    AppUrl     = "https://gms_temp.kz"
+    AppUrl = "https://gms_temp.kz"
 
     UsrTypeUndefined = 0
     UsrTypeAdmin = 1
     ```
-    <br/>
-    ### Работа с файлами
-    Файлы(фотки) из АПИ приходят в виде __path__. Чтобы отобразить ее на экране надо добавить префикс: https://gms_temp.kz/api/fs/__path__. Что бы залить фото на сервер надо использовать АПИ `/fs/`, подробно можно посмотреть ниже по документации.
+    </details>
+
+    <details>
+    <summary>**Работа с фото и файлами**</summary>
+
+    Файлы(фотки) из АПИ приходят в виде __path__. Чтобы отобразить ее на экране надо добавить префикс: https://gms_temp.kz/api/fs/__path__.
+    Что бы залить фото на сервер надо использовать АПИ `/fs/`, подробно можно посмотреть ниже по документации.
 
     Для большинства картин, которые возвращает API, действуют следующие параметры(query):
     ```
     .../photo.jpg?w=200&h=200&m=fit|fill
     ```
     Где:
-    + w - желаемая ширина картинки
-    + h - желаемая высота картинки
-    + m - метод изменения размера. Допустимые значения:
-    fit - картина полностью поместится в область (сохраняя соотношение)
-    fill - картина может обрезаться, но покроет всю область
-    <br/>
-    ### Websocket
+    <ul>
+    <li>w - желаемая ширина картинки</li>
+    <li>h - желаемая высота картинки</li>
+    <li>
+    m - метод изменения размера. Допустимые значения:
+    <ul>
+    <li>fit - картина полностью поместится в область (сохраняя соотношение)</li>
+    <li>fill - картина может обрезаться, но покроет всю область</li>
+    </ul>
+    </li>
+    </ul>
+    </details>
+
+    <details>
+    <summary>**Websocket**</summary>
+
     websocket доступен по адресу `wss://gms_temp.kz/api/websocket?auth_token=<token>`. По вебсокету приходят такие же данные как и в пушах.
+    </details>
   title: GmsTemp API.
   version: 1.0.0
 paths:
   /dic:
     get:
-      operationId: get_dic
+      description: asdfasdfasd fasdf asdf asd
+      operationId: dic_get
       parameters:
       - description: |-
           Хэш сумма значении ответа. Используется для сверки версии ответа от сервера.
@@ -93,6 +107,8 @@ paths:
       responses:
         "200":
           $ref: '#/responses/dicRep'
+        "400":
+          $ref: '#/responses/error_reply'
       summary: Все справочники.
       tags:
       - dic
@@ -106,12 +122,22 @@ responses:
     schema:
       properties:
         data:
-          $ref: '#/definitions/DicSt'
+          $ref: '#/definitions/DicDataSt'
         hs:
           type: string
           x-go-name: Hs
       type: object
+  error_reply:
+    description: ""
+    schema:
+      $ref: '#/definitions/ErrRepSt'
 schemes:
 - https
 - http
+securityDefinitions:
+  token:
+    description: 'Пример: `Authorization: 2cf24dba5fb0a30e26e83b2`'
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"

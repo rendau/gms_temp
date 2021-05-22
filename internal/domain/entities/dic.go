@@ -1,6 +1,6 @@
 package entities
 
-type DicSt struct {
+type DicDataSt struct {
 	UsrTypes []*UsrTypeSt `json:"usr_types"`
 	Config   *ConfigSt    `json:"config"`
 }

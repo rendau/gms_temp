@@ -47,7 +47,7 @@ func (c *Dic) GetJson(ctx context.Context, reqHs string) (string, []byte, error)
 		return c.dataHs, c.data, nil
 	}
 
-	data := &entities.DicSt{}
+	data := &entities.DicDataSt{}
 
 	data.UsrTypes = c.r.UsrType.List()
 

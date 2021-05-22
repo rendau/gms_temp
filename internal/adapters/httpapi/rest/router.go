@@ -1,3 +1,67 @@
+/*
+Package rest GmsTemp API.
+
+<br/><details>
+	<summary>**Константы**</summary>
+	```
+	AppUrl = "https://gms_temp.kz"
+
+	UsrTypeUndefined = 0
+	UsrTypeAdmin = 1
+	```
+</details>
+
+<details>
+	<summary>**Работа с фото и файлами**</summary>
+
+	Файлы(фотки) из АПИ приходят в виде __path__. Чтобы отобразить ее на экране надо добавить префикс: https://gms_temp.kz/api/fs/__path__.
+	Что бы залить фото на сервер надо использовать АПИ `/fs/`, подробно можно посмотреть ниже по документации.
+
+	Для большинства картин, которые возвращает API, действуют следующие параметры(query):
+	```
+	.../photo.jpg?w=200&h=200&m=fit|fill
+	```
+	Где:
+	<ul>
+		<li>w - желаемая ширина картинки</li>
+		<li>h - желаемая высота картинки</li>
+		<li>
+			m - метод изменения размера. Допустимые значения:
+			<ul>
+				<li>fit - картина полностью поместится в область (сохраняя соотношение)</li>
+				<li>fill - картина может обрезаться, но покроет всю область</li>
+			</ul>
+		</li>
+	</ul>
+</details>
+
+<details>
+	<summary>**Websocket**</summary>
+
+	websocket доступен по адресу `wss://gms_temp.kz/api/websocket?auth_token=<token>`. По вебсокету приходят такие же данные как и в пушах.
+</details>
+
+
+    Schemes: https, http
+    Host: gms_temp.kz
+    BasePath: /api
+    Version: 1.0.0
+
+    Consumes:
+    - application/json
+
+    Produces:
+    - application/json
+
+    SecurityDefinitions:
+      token:
+         type: apiKey
+         name: Authorization
+         in: header
+         description: "Пример: `Authorization: 2cf24dba5fb0a30e26e83b2`"
+
+swagger:meta
+*/
 package rest
 
 import (
