@@ -44,6 +44,8 @@ func (a *St) hUsrList(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	// --- END DOC ---
+
 	qPars := r.URL.Query()
 
 	pars := &entities.UsrListParsSt{
@@ -105,6 +107,8 @@ func (a *St) hUsrCreate(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	// --- END DOC ---
+
 	reqObj := &entities.UsrCUSt{}
 	if !a.uParseRequestJSON(w, r, reqObj) {
 		return
@@ -140,6 +144,8 @@ func (a *St) hUsrGet(w http.ResponseWriter, r *http.Request) {
 		Body entities.UsrSt
 	}
 
+	// --- END DOC ---
+
 	args := mux.Vars(r)
 	id, _ := strconv.ParseInt(args["id"], 10, 64)
 
@@ -173,6 +179,8 @@ func (a *St) hUsrUpdate(w http.ResponseWriter, r *http.Request) {
 		Body entities.UsrCUSt
 	}
 
+	// --- END DOC ---
+
 	args := mux.Vars(r)
 	id, _ := strconv.ParseInt(args["id"], 10, 64)
 
@@ -205,6 +213,8 @@ func (a *St) hUsrDelete(w http.ResponseWriter, r *http.Request) {
 		// in: path
 		Id int64 `json:"id"`
 	}
+
+	// --- END DOC ---
 
 	args := mux.Vars(r)
 	id, _ := strconv.ParseInt(args["id"], 10, 64)
