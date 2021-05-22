@@ -32,10 +32,78 @@ definitions:
   ErrRepSt:
     properties:
       error_code:
+        description: Код ошибки
         type: string
         x-go-name: ErrorCode
     type: object
     x-go-package: github.com/rendau/gms_temp/internal/adapters/httpapi/rest
+  UsrCUSt:
+    properties:
+      ava:
+        type: string
+        x-go-name: Ava
+      name:
+        type: string
+        x-go-name: Name
+      phone:
+        type: string
+        x-go-name: Phone
+      type_id:
+        format: int64
+        type: integer
+        x-go-name: TypeId
+    type: object
+    x-go-package: github.com/rendau/gms_temp/internal/domain/entities
+  UsrListSt:
+    properties:
+      ava:
+        type: string
+        x-go-name: Ava
+      created_at:
+        format: date-time
+        type: string
+        x-go-name: CreatedAt
+      id:
+        format: int64
+        type: integer
+        x-go-name: Id
+      name:
+        type: string
+        x-go-name: Name
+      phone:
+        type: string
+        x-go-name: Phone
+      type_id:
+        format: int64
+        type: integer
+        x-go-name: TypeId
+    type: object
+    x-go-package: github.com/rendau/gms_temp/internal/domain/entities
+  UsrSt:
+    properties:
+      ava:
+        type: string
+        x-go-name: Ava
+      created_at:
+        format: date-time
+        type: string
+        x-go-name: CreatedAt
+      id:
+        format: int64
+        type: integer
+        x-go-name: Id
+      name:
+        type: string
+        x-go-name: Name
+      phone:
+        type: string
+        x-go-name: Phone
+      type_id:
+        format: int64
+        type: integer
+        x-go-name: TypeId
+    type: object
+    x-go-package: github.com/rendau/gms_temp/internal/domain/entities
   UsrTypeSt:
     properties:
       id:
@@ -94,7 +162,7 @@ info:
 paths:
   /dic:
     get:
-      description: asdfasdfasd fasdf asdf asd
+      description: Это АПИ нужножно вызывать при каждом старте приложения (фронта)
       operationId: dic_get
       parameters:
       - description: |-
@@ -112,13 +180,144 @@ paths:
       summary: Все справочники.
       tags:
       - dic
+  /usrs:
+    get:
+      description: |-
+        Список пользователей
+        <br/>Доступен только для: `UsrTypeAdmin`
+      operationId: usr_list
+      parameters:
+      - format: int64
+        in: query
+        name: page
+        type: integer
+        x-go-name: Offset
+      - format: int64
+        in: query
+        name: page_size
+        type: integer
+        x-go-name: Limit
+      - format: int64
+        in: query
+        name: type_id
+        type: integer
+        x-go-name: TypeId
+      - format: int64
+        in: query
+        name: only_count
+        type: integer
+        x-go-name: OnlyCount
+      - format: int64
+        in: query
+        name: search
+        type: integer
+        x-go-name: Search
+      responses:
+        "200":
+          $ref: '#/responses/usrListRep'
+        "400":
+          $ref: '#/responses/error_reply'
+      security:
+      - token: []
+      summary: Список пользователей.
+      tags:
+      - usrs
+    post:
+      description: |-
+        Создать пользователя
+        <br/>Доступен только для: `UsrTypeAdmin`
+      operationId: usr_create
+      parameters:
+      - in: body
+        name: Body
+        schema:
+          $ref: '#/definitions/UsrCUSt'
+      responses:
+        "200":
+          $ref: '#/responses/usrCreateRep'
+        "400":
+          $ref: '#/responses/error_reply'
+      security:
+      - token: []
+      summary: Создать пользователя.
+      tags:
+      - usrs
+  /usrs/{id}:
+    delete:
+      description: |-
+        Удалить пользователя
+        <br/>Доступен только для: `UsrTypeAdmin`
+      operationId: usr_delete
+      parameters:
+      - format: int64
+        in: path
+        name: id
+        required: true
+        type: integer
+        x-go-name: Id
+      responses:
+        "200":
+          description: ""
+        "400":
+          $ref: '#/responses/error_reply'
+      security:
+      - token: []
+      summary: Удалить пользователя.
+      tags:
+      - usrs
+    get:
+      description: Пользователь
+      operationId: usr_get
+      parameters:
+      - format: int64
+        in: path
+        name: id
+        required: true
+        type: integer
+        x-go-name: Id
+      responses:
+        "200":
+          $ref: '#/responses/usrGetRep'
+        "400":
+          $ref: '#/responses/error_reply'
+      security:
+      - token: []
+      summary: Пользователь.
+      tags:
+      - usrs
+    put:
+      description: |-
+        Изменить пользователя
+        <br/>Доступен только для: `UsrTypeAdmin`
+      operationId: usr_update
+      parameters:
+      - format: int64
+        in: path
+        name: id
+        required: true
+        type: integer
+        x-go-name: Id
+      - in: body
+        name: Body
+        schema:
+          $ref: '#/definitions/UsrCUSt'
+      responses:
+        "200":
+          description: ""
+        "400":
+          $ref: '#/responses/error_reply'
+      security:
+      - token: []
+      summary: Изменить пользователя.
+      tags:
+      - usrs
 produces:
 - application/json
 responses:
   dicRep:
-    description: '`data` - может быть null, если __hs__ переданный в запросе совпадает
-      с серверным __hs__, в этом случае фронт должен использовать предыдущее значение
-      ответа от сервера'
+    description: |-
+      `hs` - фронту нужно сохранить (или заменить ранее сохраненное значение) значение этого поля и передать в параметре следующего запроса
+      `data` - может быть null, если __hs__ переданный в запросе совпадает с серверным __hs__, в этом случае фронт должен использовать предыдущее значение ответа от сервера
     schema:
       properties:
         data:
@@ -131,6 +330,41 @@ responses:
     description: ""
     schema:
       $ref: '#/definitions/ErrRepSt'
+  usrCreateRep:
+    description: '`id` - id созданной записи'
+    schema:
+      properties:
+        id:
+          format: int64
+          type: integer
+          x-go-name: Id
+      type: object
+  usrGetRep:
+    description: ""
+    schema:
+      $ref: '#/definitions/UsrSt'
+  usrListRep:
+    description: ""
+    schema:
+      properties:
+        page:
+          format: int64
+          type: integer
+          x-go-name: Page
+        page_size:
+          format: int64
+          type: integer
+          x-go-name: PageSize
+        results:
+          items:
+            $ref: '#/definitions/UsrListSt'
+          type: array
+          x-go-name: Results
+        total_count:
+          format: int64
+          type: integer
+          x-go-name: TotalCount
+      type: object
 schemes:
 - https
 - http

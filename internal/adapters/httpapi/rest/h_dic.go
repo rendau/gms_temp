@@ -10,7 +10,7 @@ import (
 func (a *St) hDicGet(w http.ResponseWriter, r *http.Request) {
 	// swagger:route GET /dic dic dic_get
 	// Все справочники.
-	// asdfasdfasd fasdf asdf asd
+	// Это АПИ нужножно вызывать при каждом старте приложения (фронта)
 	//   Responses:
 	//     200: dicRep
 	//     400: error_reply
@@ -23,6 +23,7 @@ func (a *St) hDicGet(w http.ResponseWriter, r *http.Request) {
 		Hs string `json:"hs"`
 	}
 
+	// `hs` - фронту нужно сохранить (или заменить ранее сохраненное значение) значение этого поля и передать в параметре следующего запроса
 	// `data` - может быть null, если __hs__ переданный в запросе совпадает с серверным __hs__, в этом случае фронт должен использовать предыдущее значение ответа от сервера
 	// swagger:response dicRep
 	type dicRep struct {

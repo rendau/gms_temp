@@ -3,8 +3,8 @@ package entities
 import "time"
 
 type PaginationParams struct {
-	Offset int64
-	Limit  int64
+	Offset int64 `json:"page"`
+	Limit  int64 `json:"page_size"`
 }
 
 type PeriodFilterPars struct {

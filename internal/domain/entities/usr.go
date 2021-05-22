@@ -51,7 +51,7 @@ type UsrListParsSt struct {
 
 type UsrCUSt struct {
 	TypeId *int    `json:"type_id"`
-	Phone  *string `json:"-"`
+	Phone  *string `json:"phone"`
 	Name   *string `json:"name"`
 	Ava    *string `json:"ava"`
 }
