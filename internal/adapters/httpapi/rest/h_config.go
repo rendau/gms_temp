@@ -6,7 +6,20 @@ import (
 	"github.com/rendau/gms_temp/internal/domain/entities"
 )
 
+// swagger:route PUT /config config hConfigUpdate
+// Allowed to: `UsrTypeAdmin`
+// Security:
+//   token:
+// Responses:
+//   200:
+//   400: errRep
 func (a *St) hConfigUpdate(w http.ResponseWriter, r *http.Request) {
+	// swagger:parameters hConfigUpdate
+	type docReqSt struct {
+		// in: body
+		Body entities.ConfigSt
+	}
+
 	reqObj := &entities.ConfigSt{}
 	if !a.uParseRequestJSON(w, r, reqObj) {
 		return

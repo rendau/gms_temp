@@ -38,7 +38,7 @@ func TestDic(t *testing.T) {
 	err = app.ucs.ConfigSet(admCtx, &entities.ConfigSt{
 		Contacts: entities.ConfigContactsSt{
 			Phone: "71230000321",
-			Email: "qwe@asd.kz",
+			Email: "qwe@asd.com",
 		},
 	})
 	require.Nil(t, err)
@@ -55,7 +55,7 @@ func TestDic(t *testing.T) {
 	err = json.Unmarshal(dicJson, dic)
 	require.Nil(t, err)
 	require.Equal(t, "71230000321", dic.Config.Contacts.Phone)
-	require.Equal(t, "qwe@asd.kz", dic.Config.Contacts.Email)
+	require.Equal(t, "qwe@asd.com", dic.Config.Contacts.Email)
 }
 
 func TestCfg(t *testing.T) {

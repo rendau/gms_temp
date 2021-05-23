@@ -1,6 +1,6 @@
 package rest
 
-// swagger:response error_reply
+// swagger:response errRep
 type docErrRepSt struct {
 	// in:body
 	Body ErrRepSt

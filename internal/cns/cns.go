@@ -4,7 +4,7 @@ import "time"
 
 const (
 	AppName = "GmsTemp"
-	AppUrl  = "https://gmstemp.kz"
+	AppUrl  = "https://gmstemp.com"
 
 	MaxPageSize = 1000
 )

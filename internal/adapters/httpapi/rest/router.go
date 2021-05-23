@@ -4,7 +4,7 @@ Package rest GmsTemp API.
 <br/><details>
 	<summary>**Константы**</summary>
 	```
-	AppUrl = "https://gms_temp.kz"
+	AppUrl = "https://gms_temp.com"
 
 	UsrTypeUndefined = 0
 	UsrTypeAdmin = 1
@@ -14,7 +14,7 @@ Package rest GmsTemp API.
 <details>
 	<summary>**Работа с фото и файлами**</summary>
 
-	Файлы(фотки) из АПИ приходят в виде __path__. Чтобы отобразить ее на экране надо добавить префикс: https://gms_temp.kz/api/fs/__path__.
+	Файлы(фотки) из АПИ приходят в виде __path__. Чтобы отобразить ее на экране надо добавить префикс: https://gms_temp.com/api/fs/__path__.
 	Что бы залить фото на сервер надо использовать АПИ `/fs/`, подробно можно посмотреть ниже по документации.
 
 	Для большинства картин, которые возвращает API, действуют следующие параметры(query):
@@ -38,12 +38,12 @@ Package rest GmsTemp API.
 <details>
 	<summary>**Websocket**</summary>
 
-	websocket доступен по адресу `wss://gms_temp.kz/api/websocket?auth_token=<token>`. По вебсокету приходят такие же данные как и в пушах.
+	websocket доступен по адресу `wss://gms_temp.com/api/websocket?auth_token=<token>`. По вебсокету приходят такие же данные как и в пушах.
 </details>
 
 
     Schemes: https, http
-    Host: gms_temp.kz
+    Host: gms_temp.com
     BasePath: /api
     Version: 1.0.0
 
