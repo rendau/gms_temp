@@ -4,7 +4,7 @@ Package rest GmsTemp API.
 <br/><details>
 	<summary>**Константы**</summary>
 	```
-	AppUrl = "https://gms_temp.com"
+	AppUrl = "http://gms_temp.com"
 
 	UsrTypeUndefined = 0
 	UsrTypeAdmin = 1
@@ -13,26 +13,7 @@ Package rest GmsTemp API.
 
 <details>
 	<summary>**Работа с фото и файлами**</summary>
-
-	Файлы(фотки) из АПИ приходят в виде __path__. Чтобы отобразить ее на экране надо добавить префикс: https://gms_temp.com/api/fs/__path__.
-	Что бы залить фото на сервер надо использовать АПИ `/fs/`, подробно можно посмотреть ниже по документации.
-
-	Для большинства картин, которые возвращает API, действуют следующие параметры(query):
-	```
-	.../photo.jpg?w=200&h=200&m=fit|fill
-	```
-	Где:
-	<ul>
-		<li>w - желаемая ширина картинки</li>
-		<li>h - желаемая высота картинки</li>
-		<li>
-			m - метод изменения размера. Допустимые значения:
-			<ul>
-				<li>fit - картина полностью поместится в область (сохраняя соотношение)</li>
-				<li>fill - картина может обрезаться, но покроет всю область</li>
-			</ul>
-		</li>
-	</ul>
+	[Документация файлового сервера](http://gms_temp.com/api/fs/doc/)<br/>
 </details>
 
 <details>
@@ -91,7 +72,10 @@ func (a *St) router() http.Handler {
 	}
 
 	// doc
-	r.Handle("/doc", http.RedirectHandler("/doc/", http.StatusMovedPermanently))
+	r.HandleFunc("/doc", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Location", "doc/")
+		w.WriteHeader(http.StatusMovedPermanently)
+	})
 	r.PathPrefix("/doc/").Handler(http.StripPrefix("/doc/", http.FileServer(http.Dir("./doc/"))))
 
 	// system
