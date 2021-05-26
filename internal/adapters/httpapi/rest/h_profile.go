@@ -69,7 +69,7 @@ func (a *St) hProfileAuth(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	a.uRespondJSON(w, 0, struct {
+	a.uRespondJSON(w, struct {
 		Id    int64  `json:"id"`
 		Token string `json:"token"`
 	}{usrId, token})
@@ -107,7 +107,7 @@ func (a *St) hProfileReg(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	a.uRespondJSON(w, 0, struct {
+	a.uRespondJSON(w, struct {
 		Id    int64  `json:"id"`
 		Token string `json:"token"`
 	}{usrId, token})
@@ -148,7 +148,7 @@ func (a *St) hProfileGet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	a.uRespondJSON(w, 0, profile)
+	a.uRespondJSON(w, profile)
 }
 
 // swagger:route GET /profile/numbers profile hProfileGetNumbers
@@ -171,7 +171,7 @@ func (a *St) hProfileGetNumbers(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	a.uRespondJSON(w, 0, result)
+	a.uRespondJSON(w, result)
 }
 
 // swagger:route PUT /profile profile hProfileUpdate
@@ -253,7 +253,7 @@ func (a *St) hProfileGetId(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	a.uRespondJSON(w, 0, map[string]int64{
+	a.uRespondJSON(w, map[string]int64{
 		"id": usrId,
 	})
 }

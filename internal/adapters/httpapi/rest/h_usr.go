@@ -77,14 +77,14 @@ func (a *St) hUsrList(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if paginated {
-		a.uRespondJSON(w, 0, &PaginatedListRepSt{
+		a.uRespondJSON(w, &PaginatedListRepSt{
 			Page:       page,
 			PageSize:   limit,
 			TotalCount: tCount,
 			Results:    result,
 		})
 	} else {
-		a.uRespondJSON(w, 0, result)
+		a.uRespondJSON(w, result)
 	}
 }
 
@@ -114,7 +114,7 @@ func (a *St) hUsrCreate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	a.uRespondJSON(w, 0, map[string]int64{"id": newId})
+	a.uRespondJSON(w, map[string]int64{"id": newId})
 }
 
 // swagger:route GET /usrs/{id} usrs hUsrGet
@@ -140,7 +140,7 @@ func (a *St) hUsrGet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	a.uRespondJSON(w, 0, result)
+	a.uRespondJSON(w, result)
 }
 
 // swagger:route PUT /usrs/{id} usrs hUsrUpdate

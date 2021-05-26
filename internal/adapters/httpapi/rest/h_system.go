@@ -21,7 +21,7 @@ func (a *St) hSystemFilterUnusedFiles(w http.ResponseWriter, r *http.Request) {
 
 	result := a.ucs.SystemFilterUnusedFiles(reqObj)
 
-	a.uRespondJSON(w, 0, result)
+	a.uRespondJSON(w, result)
 }
 
 func (a *St) hSystemCronTick5m(w http.ResponseWriter, r *http.Request) {

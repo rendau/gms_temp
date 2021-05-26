@@ -42,7 +42,7 @@ func (a *St) hDicGet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	a.uRespondJSON(w, 0, struct {
+	a.uRespondJSON(w, struct {
 		Hs   string          `json:"hs"`
 		Data json.RawMessage `json:"data"`
 	}{

@@ -25,7 +25,15 @@ func (a *St) uParseRequestJSON(w http.ResponseWriter, r *http.Request, dst inter
 	return true
 }
 
-func (a *St) uRespondJSON(w http.ResponseWriter, statusCode int, obj interface{}) {
+func (a *St) uRespondJSON(w http.ResponseWriter, obj interface{}) {
+	a._uRespondJSON(w, http.StatusOK, obj)
+}
+
+func (a *St) uRespondErrorJSON(w http.ResponseWriter, obj interface{}) {
+	a._uRespondJSON(w, http.StatusInternalServerError, obj)
+}
+
+func (a *St) _uRespondJSON(w http.ResponseWriter, statusCode int, obj interface{}) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 
 	if statusCode == 0 {
@@ -43,7 +51,7 @@ func (a *St) uHandleError(err error, r *http.Request, w http.ResponseWriter) boo
 	if err != nil {
 		switch cErr := err.(type) {
 		case errs.Err:
-			a.uRespondJSON(w, http.StatusBadRequest, ErrRepSt{
+			a.uRespondErrorJSON(w, ErrRepSt{
 				ErrorCode: cErr.Error(),
 			})
 		default:
