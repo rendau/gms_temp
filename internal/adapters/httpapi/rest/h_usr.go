@@ -21,7 +21,7 @@ type docUsrBodyParObjSt struct {
 	Body entities.UsrCUSt
 }
 
-// swagger:route GET /usrs usrs hUsrList
+// swagger:route GET /usr usr hUsrList
 // Allowed to: `UsrTypeAdmin`
 // Security:
 //   token:
@@ -33,15 +33,12 @@ func (a *St) hUsrList(w http.ResponseWriter, r *http.Request) {
 	type docReqSt struct {
 		// in:query
 		entities.PaginationParams
-
 		// in:query
 		TypeId int `json:"type_id"`
-
 		// in:query
 		OnlyCount int `json:"only_count"`
-
 		// in:query
-		Search int `json:"search"`
+		Search string `json:"search"`
 	}
 
 	// swagger:response usrListRep
@@ -88,7 +85,7 @@ func (a *St) hUsrList(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// swagger:route POST /usrs usrs hUsrCreate
+// swagger:route POST /usr usr hUsrCreate
 // Allowed to: `UsrTypeAdmin`
 // Security:
 //   token:
@@ -117,7 +114,7 @@ func (a *St) hUsrCreate(w http.ResponseWriter, r *http.Request) {
 	a.uRespondJSON(w, map[string]int64{"id": newId})
 }
 
-// swagger:route GET /usrs/{id} usrs hUsrGet
+// swagger:route GET /usr/{id} usr hUsrGet
 // Security:
 //   token:
 // Responses:
@@ -143,7 +140,7 @@ func (a *St) hUsrGet(w http.ResponseWriter, r *http.Request) {
 	a.uRespondJSON(w, result)
 }
 
-// swagger:route PUT /usrs/{id} usrs hUsrUpdate
+// swagger:route PUT /usr/{id} usr hUsrUpdate
 // Allowed to: `UsrTypeAdmin`
 // Security:
 //   token:
@@ -167,7 +164,7 @@ func (a *St) hUsrUpdate(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(200)
 }
 
-// swagger:route DELETE /usrs/{id} usrs hUsrDelete
+// swagger:route DELETE /usr/{id} usr hUsrDelete
 // Allowed to: `UsrTypeAdmin`
 // Security:
 //   token:

@@ -102,12 +102,12 @@ func (a *St) router() http.Handler {
 	r.Handle("/profile/change_phone", mh(a.hProfileChangePhone, "/profile/change_phone")).Methods("PUT")
 	r.Handle("/profile/id", mh(a.hProfileGetId, "/profile/id")).Methods("GET")
 
-	// usrs
-	r.Handle("/usrs", mh(a.hUsrList, "/usrs")).Methods("GET")
-	r.Handle("/usrs", mh(a.hUsrCreate, "/usrs")).Methods("POST")
-	r.Handle("/usrs/{id:[0-9]+}", mh(a.hUsrGet, "/usrs/:id")).Methods("GET")
-	r.Handle("/usrs/{id:[0-9]+}", mh(a.hUsrUpdate, "/usrs/:id")).Methods("PUT")
-	r.Handle("/usrs/{id:[0-9]+}", mh(a.hUsrDelete, "/usrs/:id")).Methods("DELETE")
+	// usr
+	r.Handle("/usr", mh(a.hUsrList, "/usr")).Methods("GET")
+	r.Handle("/usr", mh(a.hUsrCreate, "/usr")).Methods("POST")
+	r.Handle("/usr/{id:[0-9]+}", mh(a.hUsrGet, "/usr/:id")).Methods("GET")
+	r.Handle("/usr/{id:[0-9]+}", mh(a.hUsrUpdate, "/usr/:id")).Methods("PUT")
+	r.Handle("/usr/{id:[0-9]+}", mh(a.hUsrDelete, "/usr/:id")).Methods("DELETE")
 
 	return a.middleware(r)
 }

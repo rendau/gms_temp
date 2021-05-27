@@ -391,7 +391,7 @@ paths:
       summary: Отправить СМС код на номер.
       tags:
       - profile
-  /usrs:
+  /usr:
     get:
       description: 'Allowed to: `UsrTypeAdmin`'
       operationId: hUsrList
@@ -416,10 +416,9 @@ paths:
         name: only_count
         type: integer
         x-go-name: OnlyCount
-      - format: int64
-        in: query
+      - in: query
         name: search
-        type: integer
+        type: string
         x-go-name: Search
       responses:
         "200":
@@ -429,7 +428,7 @@ paths:
       security:
       - token: []
       tags:
-      - usrs
+      - usr
     post:
       description: 'Allowed to: `UsrTypeAdmin`'
       operationId: hUsrCreate
@@ -446,8 +445,8 @@ paths:
       security:
       - token: []
       tags:
-      - usrs
-  /usrs/{id}:
+      - usr
+  /usr/{id}:
     delete:
       description: 'Allowed to: `UsrTypeAdmin`'
       operationId: hUsrDelete
@@ -466,7 +465,7 @@ paths:
       security:
       - token: []
       tags:
-      - usrs
+      - usr
     get:
       operationId: hUsrGet
       parameters:
@@ -484,7 +483,7 @@ paths:
       security:
       - token: []
       tags:
-      - usrs
+      - usr
     put:
       description: 'Allowed to: `UsrTypeAdmin`'
       operationId: hUsrUpdate
@@ -507,7 +506,7 @@ paths:
       security:
       - token: []
       tags:
-      - usrs
+      - usr
 produces:
 - application/json
 responses:
