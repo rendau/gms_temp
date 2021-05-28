@@ -1,13 +1,15 @@
 package mock
 
 import (
-	"fmt"
 	"regexp"
 	"strconv"
 	"sync"
+
+	"github.com/rendau/gms_temp/internal/interfaces"
 )
 
 type St struct {
+	lg       interfaces.Logger
 	traceMsg bool
 
 	q             []Req
@@ -20,8 +22,9 @@ type Req struct {
 	Msg    string
 }
 
-func New(traceMsg bool) *St {
+func New(lg interfaces.Logger, traceMsg bool) *St {
 	return &St{
+		lg:       lg,
 		traceMsg: traceMsg,
 
 		q:             make([]Req, 0),
@@ -43,7 +46,7 @@ func (m *St) Send(phones string, msg string) bool {
 	}
 
 	if m.traceMsg {
-		fmt.Printf("sms: %+v\n", req)
+		m.lg.Infow("Sms", "phones", phones, "msg", msg)
 	}
 
 	m.q = append(m.q, req)

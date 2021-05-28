@@ -15,9 +15,7 @@ type St struct {
 	noSmsCheck bool
 	testing    bool
 
-	wg     sync.WaitGroup
-	stop   bool
-	stopMu sync.RWMutex
+	wg sync.WaitGroup
 
 	Config *Config
 
@@ -62,12 +60,6 @@ func New(
 	return c
 }
 
-func (c *St) StopAndWaitJobs() {
-	c.stopMu.Lock()
-
-	c.stop = true
-
-	c.stopMu.Unlock()
-
+func (c *St) WaitJobs() {
 	c.wg.Wait()
 }

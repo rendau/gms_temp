@@ -62,7 +62,7 @@ func Execute() {
 	}
 
 	if viper.GetString("ms_sms_url") == "" {
-		app.sms = smsMock.New(true)
+		app.sms = smsMock.New(app.lg, true)
 	} else {
 		app.sms = smsc.New(
 			app.lg,
@@ -167,7 +167,7 @@ func Execute() {
 
 	app.lg.Infow("Wait routines...")
 
-	app.core.StopAndWaitJobs()
+	app.core.WaitJobs()
 
 	app.lg.Infow("Exit")
 
@@ -175,8 +175,6 @@ func Execute() {
 }
 
 func loadConf() {
-	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
-
 	viper.SetDefault("debug", "false")
 	viper.SetDefault("http_listen", ":80")
 	viper.SetDefault("log_level", "debug")

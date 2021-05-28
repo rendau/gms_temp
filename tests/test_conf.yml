@@ -1,2 +1,1 @@
-pg:
-  dsn: postgres://localhost:5432/gms_temp_test?sslmode=disable
+pg_dsn: postgres://localhost:5432/gms_temp_test?sslmode=disable

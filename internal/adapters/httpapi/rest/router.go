@@ -13,13 +13,13 @@ Package rest GmsTemp API.
 
 <details>
 	<summary>**Работа с фото и файлами**</summary>
-	[Документация файлового сервера](http://gms_temp.com/api/fs/doc/)<br/>
+	[Документация файлового сервера](http://gms_temp.com/fs/doc/)<br/>
 </details>
 
 <details>
 	<summary>**Websocket**</summary>
 
-	websocket доступен по адресу `wss://gms_temp.com/api/websocket?auth_token=<token>`. По вебсокету приходят такие же данные как и в пушах.
+	websocket доступен по адресу `wss://gms_temp.com/websocket?auth_token=<token>`
 </details>
 
 

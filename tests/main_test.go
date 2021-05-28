@@ -35,12 +35,12 @@ func TestMain(m *testing.M) {
 
 	app.cache = mem.New()
 
-	app.db, err = pg.New(app.lg, viper.GetString("pg.dsn"), true)
+	app.db, err = pg.New(app.lg, viper.GetString("pg_dsn"), true)
 	if err != nil {
 		app.lg.Fatal(err)
 	}
 
-	app.sms = smsMock.New(false)
+	app.sms = smsMock.New(app.lg, false)
 
 	app.ws = wsMock.New()
 
