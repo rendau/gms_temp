@@ -28,7 +28,7 @@ func UsrTypeIsValid(v int) bool {
 		v == UsrTypeAdmin
 }
 
-// Push types
+// Notification types
 const (
 	NfTypeRefreshProfile = "refresh-profile"
 	NfTypeRefreshNumbers = "refresh-numbers"

@@ -30,7 +30,7 @@ func (a *St) uRespondJSON(w http.ResponseWriter, obj interface{}) {
 }
 
 func (a *St) uRespondErrorJSON(w http.ResponseWriter, obj interface{}) {
-	a._uRespondJSON(w, http.StatusInternalServerError, obj)
+	a._uRespondJSON(w, http.StatusBadRequest, obj)
 }
 
 func (a *St) _uRespondJSON(w http.ResponseWriter, statusCode int, obj interface{}) {
