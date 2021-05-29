@@ -134,7 +134,7 @@ func (d *St) UsrGet(ctx context.Context, pars *entities.UsrGetPars) (*entities.U
 
 	if pars.Token != nil {
 		args["token"] = *pars.Token
-		qFrom += ` and u.token = ${token}`
+		qWhere += ` and u.token = ${token}`
 	}
 
 	usr := &entities.UsrSt{}
@@ -162,6 +162,7 @@ func (d *St) UsrGet(ctx context.Context, pars *entities.UsrGetPars) (*entities.U
 		if err == pgx.ErrNoRows {
 			return nil, nil
 		}
+
 		return nil, d.handleError(ctx, err)
 	}
 

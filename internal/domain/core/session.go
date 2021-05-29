@@ -34,12 +34,7 @@ func (c *Session) Get(ctx context.Context, token string) *entities.Session {
 		return cacheV
 	}
 
-	result.ID, err = c.r.Usr.AuthByToken(ctx, token)
-	if err != nil {
-		return result
-	}
-
-	result.TypeId, err = c.r.Usr.GetTypeId(ctx, result.ID)
+	result.ID, result.TypeId, err = c.r.Usr.AuthByToken(ctx, token)
 	if err != nil {
 		return result
 	}

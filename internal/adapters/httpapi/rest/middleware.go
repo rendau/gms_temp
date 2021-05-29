@@ -7,6 +7,8 @@ import (
 )
 
 func (a *St) middleware(h http.Handler) http.Handler {
+	h = a.mwNoCache(h)
+
 	h = cors.New(cors.Options{
 		AllowOriginFunc: func(origin string) bool { return true },
 		AllowedMethods: []string{
@@ -27,7 +29,17 @@ func (a *St) middleware(h http.Handler) http.Handler {
 
 	h = a.mwRecovery(h)
 
+	// h = a.mwLog(h)
+
 	return h
+}
+
+func (a *St) mwNoCache(h http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Cache-Control", "no-cache")
+
+		h.ServeHTTP(w, r)
+	})
 }
 
 func (a *St) mwRecovery(h http.Handler) http.Handler {

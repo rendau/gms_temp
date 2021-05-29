@@ -18,6 +18,7 @@ const (
 	SFDUsrAva = "usr_avatar"
 )
 
+// Usr types
 const (
 	UsrTypeUndefined = 0
 	UsrTypeAdmin     = 1

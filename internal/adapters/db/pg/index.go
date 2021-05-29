@@ -72,7 +72,7 @@ func (d *St) handleError(ctx context.Context, err error) error {
 
 	// errStr := err.Error()
 
-	// d.lg.Errorw(ErrMsg, err)
+	d.lg.Errorw(ErrMsg, err)
 
 	return err
 }

@@ -344,21 +344,22 @@ func (c *Usr) Auth(ctx context.Context, obj *entities.PhoneAndSmsCodeSt) (int64,
 	return id, token, nil
 }
 
-func (c *Usr) AuthByToken(ctx context.Context, token string) (int64, error) {
+// AuthByToken returns: usrId, usrTypeId, error
+func (c *Usr) AuthByToken(ctx context.Context, token string) (int64, int, error) {
 	if token == "" {
-		return 0, errs.NotAuthorized
+		return 0, 0, errs.NotAuthorized
 	}
 
-	id, err := c.GetIdForToken(ctx, token, false)
+	usr, err := c.Get(ctx, &entities.UsrGetPars{Token: &token}, false)
 	if err != nil {
-		return 0, err
+		return 0, 0, err
 	}
 
-	if id == 0 {
-		return 0, errs.NotAuthorized
+	if usr == nil {
+		return 0, 0, errs.NotAuthorized
 	}
 
-	return id, nil
+	return usr.Id, usr.TypeId, nil
 }
 
 func (c *Usr) Reg(ctx context.Context, data *entities.UsrRegReqSt) (int64, string, error) {

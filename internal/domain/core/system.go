@@ -54,7 +54,7 @@ func (c *System) FilterUnusedFiles(filePaths []string) []string {
 		}
 
 		if len(result) == 0 {
-			return result
+			break
 		}
 	}
 

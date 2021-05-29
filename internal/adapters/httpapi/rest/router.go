@@ -4,8 +4,6 @@ Package rest GmsTemp API.
 <br/><details>
 	<summary>**Константы**</summary>
 	```
-	AppUrl = "http://gms_temp.com"
-
 	UsrTypeUndefined = 0
 	UsrTypeAdmin = 1
 	```
@@ -14,6 +12,7 @@ Package rest GmsTemp API.
 <details>
 	<summary>**Работа с фото и файлами**</summary>
 	[Документация файлового сервера](http://gms_temp.com/fs/doc/)<br/>
+	Для заливки файлов на сервер необходимо указывать наименование папки (dir). Наименование нужно брать из констант
 </details>
 
 <details>

@@ -7,6 +7,7 @@ import (
 )
 
 // swagger:route PUT /config config hConfigUpdate
+// Конфикурационные данные системы.
 // Allowed to: `UsrTypeAdmin`
 // Security:
 //   token:

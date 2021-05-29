@@ -57,6 +57,8 @@ func prepareDbForNewTest() {
 	var err error
 
 	app.cache.Clean()
+	app.sms.Clean()
+	app.ws.Clean()
 
 	truncateTables([]string{
 		"cfg",
