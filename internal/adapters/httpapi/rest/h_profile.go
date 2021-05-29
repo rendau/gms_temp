@@ -184,7 +184,7 @@ func (a *St) hProfileGetNumbers(w http.ResponseWriter, r *http.Request) {
 func (a *St) hProfileUpdate(w http.ResponseWriter, r *http.Request) {
 	// swagger:parameters hProfileUpdate
 	type docReqSt struct {
-		// `type_id` и `phone` игнорируется
+		// `type_id`, `phone` игнорируются
 		// in: body
 		Body entities.UsrCUSt
 	}

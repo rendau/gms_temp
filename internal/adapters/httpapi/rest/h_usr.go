@@ -36,7 +36,7 @@ func (a *St) hUsrList(w http.ResponseWriter, r *http.Request) {
 		// in:query
 		TypeId int `json:"type_id"`
 		// in:query
-		OnlyCount int `json:"only_count"`
+		OnlyCount bool `json:"only_count"`
 		// in:query
 		Search string `json:"search"`
 	}
