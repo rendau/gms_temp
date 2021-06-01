@@ -4,8 +4,16 @@ Package rest GmsTemp API.
 <br/><details>
 	<summary>**Константы**</summary>
 	```
+	# Static file directories
+	SFDUsrAva = "usr_avatar"
+
+	# User types
 	UsrTypeUndefined = 0
-	UsrTypeAdmin = 1
+	UsrTypeAdmin     = 1
+
+	# Notification types
+	NfTypeRefreshProfile = "refresh-profile"
+	NfTypeRefreshNumbers = "refresh-numbers"
 	```
 </details>
 
