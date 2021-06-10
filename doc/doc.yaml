@@ -181,22 +181,29 @@ info:
     <br/><details>
     <summary>**Константы**</summary>
     ```
-    AppUrl = "http://gms_temp.com"
+    # Static file directories
+    SFDUsrAva = "usr_avatar"
 
+    # User types
     UsrTypeUndefined = 0
-    UsrTypeAdmin = 1
+    UsrTypeAdmin     = 1
+
+    # Notification types
+    NfTypeRefreshProfile = "refresh-profile"
+    NfTypeRefreshNumbers = "refresh-numbers"
     ```
     </details>
 
     <details>
     <summary>**Работа с фото и файлами**</summary>
-    [Документация файлового сервера](http://gms_temp.com/api/fs/doc/)<br/>
+    [Документация файлового сервера](http://gms_temp.com/fs/doc/)<br/>
+    Для заливки файлов на сервер необходимо указывать наименование папки (dir). Наименование нужно брать из констант
     </details>
 
     <details>
     <summary>**Websocket**</summary>
 
-    websocket доступен по адресу `wss://gms_temp.com/api/websocket?auth_token=<token>`. По вебсокету приходят такие же данные как и в пушах.
+    websocket доступен по адресу `wss://gms_temp.com/websocket?auth_token=<token>`
     </details>
   title: GmsTemp API.
   version: 1.0.0
@@ -217,6 +224,7 @@ paths:
           $ref: '#/responses/errRep'
       security:
       - token: []
+      summary: Конфикурационные данные системы.
       tags:
       - config
   /dic:
@@ -255,7 +263,7 @@ paths:
     put:
       operationId: hProfileUpdate
       parameters:
-      - description: '`type_id` и `phone` игнорируется'
+      - description: '`type_id`, `phone` игнорируются'
         in: body
         name: Body
         schema:
@@ -411,10 +419,9 @@ paths:
         name: type_id
         type: integer
         x-go-name: TypeId
-      - format: int64
-        in: query
+      - in: query
         name: only_count
-        type: integer
+        type: boolean
         x-go-name: OnlyCount
       - in: query
         name: search

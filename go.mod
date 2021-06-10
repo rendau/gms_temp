@@ -1,6 +1,6 @@
 module github.com/rendau/gms_temp
 
-go 1.15
+go 1.16
 
 require (
 	github.com/go-redis/redis/v7 v7.4.0
