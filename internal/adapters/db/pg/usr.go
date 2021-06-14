@@ -116,7 +116,7 @@ func (d *St) UsrList(ctx context.Context, pars *entities.UsrListParsSt) ([]*enti
 	return recs, tCount, nil
 }
 
-func (d *St) UsrGet(ctx context.Context, pars *entities.UsrGetPars) (*entities.UsrSt, error) {
+func (d *St) UsrGet(ctx context.Context, pars *entities.UsrGetParsSt) (*entities.UsrSt, error) {
 	args := make(map[string]interface{})
 
 	qFrom := `usr u`

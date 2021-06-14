@@ -191,7 +191,7 @@ func (c *Usr) ListOne(ctx context.Context, id int64) (*entities.UsrListSt, error
 	return rows[0], nil
 }
 
-func (c *Usr) Get(ctx context.Context, pars *entities.UsrGetPars, errNE bool) (*entities.UsrSt, error) {
+func (c *Usr) Get(ctx context.Context, pars *entities.UsrGetParsSt, errNE bool) (*entities.UsrSt, error) {
 	var err error
 
 	var result *entities.UsrSt
@@ -350,7 +350,7 @@ func (c *Usr) AuthByToken(ctx context.Context, token string) (int64, int, error)
 		return 0, 0, errs.NotAuthorized
 	}
 
-	usr, err := c.Get(ctx, &entities.UsrGetPars{Token: &token}, false)
+	usr, err := c.Get(ctx, &entities.UsrGetParsSt{Token: &token}, false)
 	if err != nil {
 		return 0, 0, err
 	}
@@ -466,7 +466,7 @@ func (c *Usr) Create(ctx context.Context, obj *entities.UsrCUSt) (int64, error) 
 }
 
 func (c *Usr) GetProfile(ctx context.Context, id int64) (*entities.UsrProfileSt, error) {
-	usr, err := c.Get(ctx, &entities.UsrGetPars{Id: &id}, true)
+	usr, err := c.Get(ctx, &entities.UsrGetParsSt{Id: &id}, true)
 	if err != nil {
 		return nil, err
 	}

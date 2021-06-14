@@ -13,7 +13,7 @@ type UsrSt struct {
 	Name      string    `json:"name"`
 }
 
-type UsrGetPars struct {
+type UsrGetParsSt struct {
 	Id    *int64
 	Phone *string
 	Token *string

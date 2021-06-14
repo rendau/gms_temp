@@ -18,7 +18,7 @@ type Db interface {
 
 	// usr
 	UsrList(ctx context.Context, pars *entities.UsrListParsSt) ([]*entities.UsrListSt, int64, error)
-	UsrGet(ctx context.Context, pars *entities.UsrGetPars) (*entities.UsrSt, error)
+	UsrGet(ctx context.Context, pars *entities.UsrGetParsSt) (*entities.UsrSt, error)
 	UsrIdExists(ctx context.Context, id int64) (bool, error)
 	UsrIdsExists(ctx context.Context, ids []int64) (bool, error)
 	UsrPhoneExists(ctx context.Context, phone string, excludeId int64) (bool, error)

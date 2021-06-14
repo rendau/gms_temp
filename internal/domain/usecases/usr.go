@@ -34,7 +34,7 @@ func (u *St) UsrGet(ctx context.Context,
 		return nil, err
 	}
 
-	return u.cr.Usr.Get(ctx, &entities.UsrGetPars{Id: &id}, true)
+	return u.cr.Usr.Get(ctx, &entities.UsrGetParsSt{Id: &id}, true)
 }
 
 func (u *St) UsrCreate(ctx context.Context,
