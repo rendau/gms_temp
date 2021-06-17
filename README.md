@@ -1,4 +1,4 @@
-# Go micro-service
+# GmsTemp
 
 ### DB dump:
 ```
