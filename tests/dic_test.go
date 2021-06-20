@@ -72,10 +72,10 @@ func TestCfg(t *testing.T) {
 	require.Empty(t, cfg.Contacts.Email)
 
 	err = app.ucs.ConfigSet(bgCtx, &entities.ConfigSt{})
-	errIsEqual(t, err, errs.NotAuthorized)
+	require.Equal(t, errs.NotAuthorized, err)
 
 	err = app.ucs.ConfigSet(usr1Ctx, &entities.ConfigSt{})
-	errIsEqual(t, err, errs.PermissionDenied)
+	require.Equal(t, errs.PermissionDenied, err)
 
 	err = app.ucs.ConfigSet(admCtx, &entities.ConfigSt{
 		Contacts: entities.ConfigContactsSt{

@@ -6,7 +6,6 @@ import (
 
 	"github.com/rendau/gms_temp/internal/cns"
 	"github.com/rendau/gms_temp/internal/domain/entities"
-	"github.com/rendau/gms_temp/internal/domain/errs"
 	"github.com/stretchr/testify/require"
 )
 
@@ -69,21 +68,6 @@ func prepareDbForNewTest() {
 	`, []int64{admId, usr1Id})
 	if err != nil {
 		app.lg.Fatal(err)
-	}
-}
-
-func errIsEqual(t *testing.T, v error, expectedErr error, msgArgs ...interface{}) {
-	if expectedErr == nil {
-		require.Nil(t, v, msgArgs...)
-	} else {
-		require.NotNil(t, v, msgArgs...)
-
-		switch cErr := v.(type) {
-		case errs.Err:
-			require.Equal(t, expectedErr.Error(), cErr.Error(), msgArgs...)
-		default:
-			app.lg.Fatalw("bad error type", v)
-		}
 	}
 }
 

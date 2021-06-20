@@ -25,7 +25,7 @@ func TestAuth(t *testing.T) {
 		usrPhone,
 		true,
 	)
-	errIsEqual(t, err, errs.PhoneNotExists)
+	require.Equal(t, errs.PhoneNotExists, err)
 
 	usrId, err := app.core.Usr.Create(bgCtx, &entities.UsrCUSt{
 		TypeId: util.NewInt(usrTypeId),
@@ -42,7 +42,7 @@ func TestAuth(t *testing.T) {
 			SmsCode: 1234,
 		},
 	)
-	errIsEqual(t, err, errs.SmsHasNotSentToPhone)
+	require.Equal(t, errs.SmsHasNotSentToPhone, err)
 
 	err = app.ucs.ProfileSendPhoneValidatingCode(
 		bgCtx,
@@ -62,7 +62,7 @@ func TestAuth(t *testing.T) {
 		},
 	)
 	require.NotNil(t, err)
-	errIsEqual(t, err, errs.WrongSmsCode)
+	require.Equal(t, errs.WrongSmsCode, err)
 
 	id, token, err := app.ucs.ProfileAuth(
 		bgCtx,
@@ -90,7 +90,7 @@ func TestAuth(t *testing.T) {
 	usrCtx := app.ucs.ContextWithSession(context.Background(), app.ucs.SessionGet(context.Background(), token))
 
 	_, err = app.ucs.ProfileGet(usrCtx)
-	errIsEqual(t, err, errs.NotAuthorized)
+	require.Equal(t, errs.NotAuthorized, err)
 
 	err = app.ucs.ProfileSendPhoneValidatingCode(
 		bgCtx,
@@ -169,7 +169,7 @@ func TestReg(t *testing.T) {
 				c.phone,
 				false,
 			)
-			errIsEqual(t, err, c.smsE, cI)
+			require.Equal(t, c.smsE, err, cI)
 
 			if err == nil {
 				smsCode = app.sms.PullCode()
@@ -187,7 +187,7 @@ func TestReg(t *testing.T) {
 				Name: &c.name,
 			},
 		)
-		errIsEqual(t, err, c.e, cI)
+		require.Equal(t, c.e, err, cI)
 		if c.e == nil {
 			require.Greater(t, id, int64(0))
 			require.Nil(t, err, cI)
@@ -235,7 +235,7 @@ func TestProfileGet(t *testing.T) {
 	bgCtx := context.Background()
 
 	_, err := app.ucs.ProfileGet(bgCtx)
-	errIsEqual(t, err, errs.NotAuthorized)
+	require.Equal(t, errs.NotAuthorized, err)
 
 	profile, err := app.ucs.ProfileGet(ctxWithSes(t, nil, admId))
 	require.Nil(t, err)
@@ -270,7 +270,7 @@ func TestPhoneChange(t *testing.T) {
 		Phone:   "72340000002",
 		SmsCode: 1234,
 	})
-	errIsEqual(t, err, errs.SmsHasNotSentToPhone)
+	require.Equal(t, errs.SmsHasNotSentToPhone, err)
 
 	err = app.ucs.ProfileSendPhoneValidatingCode(bgCtx, "72340000002", false)
 	require.Nil(t, err)
@@ -281,7 +281,7 @@ func TestPhoneChange(t *testing.T) {
 		Phone:   "72340000002",
 		SmsCode: 1234,
 	})
-	errIsEqual(t, err, errs.WrongSmsCode)
+	require.Equal(t, errs.WrongSmsCode, err)
 
 	err = app.ucs.ProfileChangePhone(usrCtx, &entities.PhoneAndSmsCodeSt{
 		Phone:   "72340000002",
@@ -303,7 +303,7 @@ func TestPhoneChange(t *testing.T) {
 		Phone:   admPhone,
 		SmsCode: smsCode,
 	})
-	errIsEqual(t, err, errs.PhoneExists)
+	require.Equal(t, errs.PhoneExists, err)
 
 	err = app.ucs.ProfileSendPhoneValidatingCode(bgCtx, "72340000002", false)
 	require.Nil(t, err)
