@@ -10,9 +10,9 @@ func (u *St) ConfigSet(ctx context.Context,
 	config *entities.ConfigSt) error {
 	var err error
 
-	ses := u.ContextGetSession(ctx)
+	ses := u.SessionGetFromContext(ctx)
 
-	if err = u.SessionRequireOneOfTypeIds(ses); err != nil {
+	if err = u.SessionRequireOneOfTypeIds(ses, false); err != nil {
 		return err
 	}
 

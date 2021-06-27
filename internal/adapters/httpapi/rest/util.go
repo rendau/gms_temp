@@ -83,7 +83,7 @@ func (a *St) uGetRequestContext(r *http.Request) context.Context {
 
 	ctx := context.Background()
 
-	return a.ucs.ContextWithSession(ctx, a.ucs.SessionGet(ctx, token))
+	return a.ucs.SessionSetToContextByToken(ctx, token)
 }
 
 func (a *St) uExtractPaginationPars(pars url.Values) (offset int64, limit int64, page int64) {

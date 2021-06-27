@@ -77,7 +77,7 @@ func (u *St) ProfileReg(ctx context.Context,
 func (u *St) ProfileLogout(ctx context.Context) error {
 	var err error
 
-	ses := u.ContextGetSession(ctx)
+	ses := u.SessionGetFromContext(ctx)
 
 	if ses.ID == 0 {
 		return nil
@@ -103,7 +103,7 @@ func (u *St) ProfileLogout(ctx context.Context) error {
 func (u *St) ProfileGet(ctx context.Context) (*entities.UsrProfileSt, error) {
 	var err error
 
-	ses := u.ContextGetSession(ctx)
+	ses := u.SessionGetFromContext(ctx)
 
 	if err = u.SessionRequireAuth(ses); err != nil {
 		return nil, err
@@ -115,7 +115,7 @@ func (u *St) ProfileGet(ctx context.Context) (*entities.UsrProfileSt, error) {
 func (u *St) ProfileGetNumbers(ctx context.Context) (*entities.UsrNumbersSt, error) {
 	var err error
 
-	ses := u.ContextGetSession(ctx)
+	ses := u.SessionGetFromContext(ctx)
 
 	if err = u.SessionRequireAuth(ses); err != nil {
 		return nil, err
@@ -128,7 +128,7 @@ func (u *St) ProfileUpdate(ctx context.Context,
 	obj *entities.UsrCUSt) error {
 	var err error
 
-	ses := u.ContextGetSession(ctx)
+	ses := u.SessionGetFromContext(ctx)
 
 	if err = u.SessionRequireAuth(ses); err != nil {
 		return err
@@ -159,7 +159,7 @@ func (u *St) ProfileChangePhone(ctx context.Context,
 	obj *entities.PhoneAndSmsCodeSt) error {
 	var err error
 
-	ses := u.ContextGetSession(ctx)
+	ses := u.SessionGetFromContext(ctx)
 
 	if err = u.SessionRequireAuth(ses); err != nil {
 		return err
@@ -183,13 +183,13 @@ func (u *St) ProfileChangePhone(ctx context.Context,
 }
 
 func (u *St) ProfileGetId(ctx context.Context) (int64, error) {
-	return u.ContextGetSession(ctx).ID, nil
+	return u.SessionGetFromContext(ctx).ID, nil
 }
 
 func (u *St) ProfileDelete(ctx context.Context) error {
 	var err error
 
-	ses := u.ContextGetSession(ctx)
+	ses := u.SessionGetFromContext(ctx)
 
 	if err = u.SessionRequireAuth(ses); err != nil {
 		return err

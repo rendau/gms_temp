@@ -8,8 +8,10 @@ import (
 	"github.com/rendau/gms_temp/internal/domain/entities"
 )
 
-const cacheKeyPattern = "user_session_%s"
-const cacheDuration = 20 * time.Minute
+const sessionContextKey = "user_session"
+
+const sessionCacheKeyPattern = "user_session_%s"
+const sessionCacheDuration = 20 * time.Minute
 
 type Session struct {
 	r *St
@@ -28,7 +30,7 @@ func (c *Session) Get(ctx context.Context, token string) *entities.Session {
 		return result
 	}
 
-	cacheKey := fmt.Sprintf(cacheKeyPattern, token)
+	cacheKey := fmt.Sprintf(sessionCacheKeyPattern, token)
 
 	if cacheV := c.getFromCache(cacheKey); cacheV != nil {
 		return cacheV
@@ -66,6 +68,25 @@ func (c *Session) DeleteMany(ids []int64) {
 	c.r.Notification.SendRefreshProfile(nfIds)
 }
 
+func (c *Session) SetToContext(ctx context.Context, ses *entities.Session) context.Context {
+	return context.WithValue(ctx, sessionContextKey, ses)
+}
+
+func (c *Session) GetFromContext(ctx context.Context) *entities.Session {
+	contextV := ctx.Value(sessionContextKey)
+	if contextV == nil {
+		return &entities.Session{}
+	}
+
+	switch ses := contextV.(type) {
+	case *entities.Session:
+		return ses
+	default:
+		c.r.lg.Fatal("wrong type of session in context")
+		return &entities.Session{}
+	}
+}
+
 func (c *Session) getFromCache(key string) *entities.Session {
 	result := &entities.Session{}
 
@@ -81,11 +102,11 @@ func (c *Session) getFromCache(key string) *entities.Session {
 }
 
 func (c *Session) setToCache(key string, v *entities.Session) {
-	_ = c.r.cache.SetJsonObj(key, v, cacheDuration)
+	_ = c.r.cache.SetJsonObj(key, v, sessionCacheDuration)
 }
 
 func (c *Session) deleteUsrIdFromCache(id int64) bool {
-	keys := c.r.cache.Keys(fmt.Sprintf(cacheKeyPattern, "*"))
+	keys := c.r.cache.Keys(fmt.Sprintf(sessionCacheKeyPattern, "*"))
 
 	found := false
 

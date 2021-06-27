@@ -87,7 +87,7 @@ func TestAuth(t *testing.T) {
 	require.NotNil(t, ses)
 	require.Equal(t, int64(0), ses.ID)
 
-	usrCtx := app.ucs.ContextWithSession(context.Background(), app.ucs.SessionGet(context.Background(), token))
+	usrCtx := app.ucs.SessionSetToContextByToken(context.Background(), token)
 
 	_, err = app.ucs.ProfileGet(usrCtx)
 	require.Equal(t, errs.NotAuthorized, err)
@@ -118,7 +118,7 @@ func TestAuth(t *testing.T) {
 	require.Equal(t, usrId, ses.ID)
 	require.Equal(t, usrTypeId, ses.TypeId)
 
-	usrCtx = app.ucs.ContextWithSession(context.Background(), ses)
+	usrCtx = app.ucs.SessionSetToContextByToken(context.Background(), token)
 
 	profile, err := app.ucs.ProfileGet(usrCtx)
 	require.Nil(t, err)
@@ -217,7 +217,7 @@ func TestReg(t *testing.T) {
 	)
 	require.Nil(t, err)
 
-	usrCtx := app.ucs.ContextWithSession(context.Background(), app.ucs.SessionGet(context.Background(), token))
+	usrCtx := app.ucs.SessionSetToContextByToken(context.Background(), token)
 
 	profile, err := app.ucs.ProfileGet(usrCtx)
 	require.Nil(t, err)
