@@ -11,6 +11,7 @@ import (
 	"github.com/jackc/pgx/v4"
 	"github.com/jackc/pgx/v4/pgxpool"
 	_ "github.com/jackc/pgx/v4/stdlib" // driver
+	"github.com/rendau/gms_temp/internal/domain/errs"
 	"github.com/rendau/gms_temp/internal/interfaces"
 )
 
@@ -70,9 +71,12 @@ func (d *St) handleError(ctx context.Context, err error) error {
 		return nil
 	}
 
-	// errStr := err.Error()
-
-	d.lg.Errorw(ErrMsg, err)
+	if err == pgx.ErrNoRows {
+		err = errs.ObjectNotFound
+		// d.lg.Errorw(ErrMsg, err)
+	} else {
+		d.lg.Errorw(ErrMsg, err)
+	}
 
 	return err
 }
