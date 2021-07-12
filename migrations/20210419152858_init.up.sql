@@ -12,16 +12,15 @@ create table cfg
 
 create table usr
 (
-    id         bigserial   not null,
+    id         bigserial   not null
+        primary key,
     created_at timestamptz not null default now(),
     type_id    smallint    not null default 0,
-    phone      text        not null,
+    phone      text        not null
+        constraint usr_unique_phone unique,
     ava        text        not null default '',
     name       text        not null default '',
-    token      text        not null default '',
-
-    constraint usr_pk primary key (id),
-    constraint usr_unique_phone unique (phone)
+    token      text        not null default ''
 );
 create index usr_created_at_idx
     on usr (created_at);
