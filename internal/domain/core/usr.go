@@ -2,9 +2,9 @@ package core
 
 import (
 	"context"
-	"crypto/sha512"
 	"fmt"
 	"math/rand"
+	"strconv"
 	"time"
 
 	"github.com/rendau/gms_temp/internal/cns"
@@ -14,6 +14,8 @@ import (
 )
 
 const (
+	refreshTokenDur = int64(0)
+
 	unValidateCacheKeyTmpl    = "phone_validate_%s"
 	unValidateCacheTimeout    = 20 * time.Minute
 	unValidateSmsSendLimit    = 3
@@ -231,8 +233,11 @@ func (c *Usr) GetToken(ctx context.Context, id int64) (string, error) {
 }
 
 func (c *Usr) GenerateAndSaveToken(ctx context.Context, id int64) (string, error) {
-	tokenSrc := fmt.Sprintf("auth-lt-token %d %s", id, time.Now())
-	token := fmt.Sprintf("%x", sha512.Sum512([]byte(tokenSrc)))
+	token, _ := c.r.jwts.JwtCreate(
+		strconv.FormatInt(id, 10),
+		refreshTokenDur,
+		map[string]interface{}{},
+	)
 
 	err := c.SetToken(ctx, id, token)
 	if err != nil {
@@ -283,57 +288,97 @@ func (c *Usr) GetIdForPhone(ctx context.Context, phone string, errNE bool) (int6
 	return id, nil
 }
 
-func (c *Usr) Auth(ctx context.Context, obj *entities.PhoneAndSmsCodeSt) (int64, string, error) {
+// Auth returns accessToken, refreshToken, error
+func (c *Usr) Auth(ctx context.Context, obj *entities.PhoneAndSmsCodeSt) (string, string, error) {
 	var err error
 
 	obj.Phone, err = c.ValidatePhone(obj.Phone)
 	if err != nil {
-		return 0, "", err
+		return "", "", err
 	}
 
 	err = c.CheckPhoneValidatingCode(ctx, obj)
 	if err != nil {
-		return 0, "", err
+		return "", "", err
 	}
 
 	usr, err := c.Get(ctx, &entities.UsrGetParsSt{
 		Phone: &obj.Phone,
 	}, true)
 	if err != nil {
-		return 0, "", err
+		return "", "", err
 	}
 
-	token, err := c.r.Session.CreateToken(&entities.Session{
+	refreshToken, err := c.GetToken(ctx, usr.Id)
+	if err != nil {
+		return "", "", err
+	}
+
+	if refreshToken == "" {
+		refreshToken, err = c.GenerateAndSaveToken(ctx, usr.Id)
+		if err != nil {
+			return "", "", err
+		}
+	}
+
+	accessToken, err := c.r.Session.CreateToken(&entities.Session{
 		Id:     usr.Id,
 		TypeId: usr.TypeId,
 	})
 	if err != nil {
-		return 0, "", err
+		return "", "", err
 	}
 
 	c.RemovePhoneValidatingCache(ctx, obj.Phone)
 
-	return usr.Id, token, nil
+	return accessToken, refreshToken, nil
 }
 
-func (c *Usr) Reg(ctx context.Context, data *entities.UsrRegReqSt) (int64, string, error) {
+// AuthByRefreshToken returns: accessToken, error
+func (c *Usr) AuthByRefreshToken(ctx context.Context, refreshToken string) (string, error) {
+	if refreshToken == "" {
+		return "", errs.NotAuthorized
+	}
+
+	usr, err := c.Get(ctx, &entities.UsrGetParsSt{Token: &refreshToken}, false)
+	if err != nil {
+		return "", err
+	}
+
+	if usr == nil {
+		return "", errs.NotAuthorized
+	}
+
+	accessToken, err := c.r.Session.CreateToken(&entities.Session{
+		Id:     usr.Id,
+		TypeId: usr.TypeId,
+	})
+	if err != nil {
+		return "", err
+	}
+
+	return accessToken, nil
+}
+
+// Reg returns usrId, accessToken, refreshToken, error
+func (c *Usr) Reg(ctx context.Context, data *entities.UsrRegReqSt) (string, string, error) {
 	var err error
 
 	if data.Phone, err = c.ValidatePhone(data.Phone); err != nil {
-		return 0, "", err
+		return "", "", err
 	}
 
 	err = c.CheckPhoneValidatingCode(ctx, &data.PhoneAndSmsCodeSt)
 	if err != nil {
-		return 0, "", err
+		return "", "", err
 	}
 
 	id, err := c.GetIdForPhone(ctx, data.Phone, false)
 	if err != nil {
-		return 0, "", err
+		return "", "", err
 	}
 	if id > 0 {
-		return 0, "", errs.PhoneExists
+		return "", "", errs.PhoneExists
 	}
 
 	id, err = c.Create(ctx, &entities.UsrCUSt{
@@ -343,27 +388,32 @@ func (c *Usr) Reg(ctx context.Context, data *entities.UsrRegReqSt) (int64, strin
 		Name:   data.Name,
 	})
 	if err != nil {
-		return 0, "", err
+		return "", "", err
 	}
 
 	newUsr, err := c.Get(ctx, &entities.UsrGetParsSt{
 		Id: &id,
 	}, true)
 	if err != nil {
-		return 0, "", err
+		return "", "", err
 	}
 
-	token, err := c.r.Session.CreateToken(&entities.Session{
+	refreshToken, err := c.GenerateAndSaveToken(ctx, newUsr.Id)
+	if err != nil {
+		return "", "", err
+	}
+
+	accessToken, err := c.r.Session.CreateToken(&entities.Session{
 		Id:     newUsr.Id,
 		TypeId: newUsr.TypeId,
 	})
 	if err != nil {
-		return 0, "", err
+		return "", "", err
 	}
 
 	c.RemovePhoneValidatingCache(ctx, data.Phone)
 
-	return id, token, nil
+	return accessToken, refreshToken, nil
 }
 
 func (c *Usr) ValidateCU(ctx context.Context, obj *entities.UsrCUSt, id int64) error {
@@ -493,6 +543,11 @@ func (c *Usr) ChangePhone(ctx context.Context, id int64, obj *entities.PhoneAndS
 }
 
 func (c *Usr) Logout(ctx context.Context, id int64) error {
+	// err := c.ResetToken(ctx, id)
+	// if err != nil {
+	// 	return err
+	// }
+
 	return nil
 }
 

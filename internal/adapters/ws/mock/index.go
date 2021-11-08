@@ -2,29 +2,32 @@ package mock
 
 import (
 	"sync"
+
+	"github.com/rendau/gms_temp/internal/interfaces"
 )
 
 type St struct {
+	lg      interfaces.Logger
+	testing bool
+
 	q  []Req
 	mu sync.Mutex
 }
 
 type Req struct {
-	UsrIds []int64
-	Data   map[string]string
+	channel string
+	Data    interface{}
 }
 
-func New() *St {
+func New(lg interfaces.Logger, testing bool) *St {
 	return &St{
-		q: make([]Req, 0),
+		lg:      lg,
+		testing: testing,
+		q:       make([]Req, 0),
 	}
 }
 
-func (m *St) Send2User(usrId int64, data map[string]string) bool {
-	return m.Send2Users([]int64{usrId}, data)
-}
-
-func (m *St) Send2Users(usrIds []int64, data map[string]string) bool {
+func (m *St) Send(channel string, data interface{}) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
@@ -33,15 +36,15 @@ func (m *St) Send2Users(usrIds []int64, data map[string]string) bool {
 	}
 
 	req := Req{
-		UsrIds: usrIds,
-		Data:   data,
+		channel: channel,
+		Data:    data,
 	}
 
-	// fmt.Printf("ws: %+v\n", req)
+	if !m.testing {
+		m.lg.Infow("Ws sent", "channel", channel, "data", data)
+	}
 
 	m.q = append(m.q, req)
-
-	return true
 }
 
 func (m *St) PullAll() []Req {
@@ -53,6 +56,19 @@ func (m *St) PullAll() []Req {
 	m.q = make([]Req, 0)
 
 	return q
+}
+
+func (m *St) Get(channel string) interface{} {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	for _, req := range m.q {
+		if req.channel == channel {
+			return req.Data
+		}
+	}
+
+	return nil
 }
 
 func (m *St) Clean() {

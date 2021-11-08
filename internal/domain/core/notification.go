@@ -3,12 +3,15 @@ package core
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/rendau/gms_temp/internal/cns"
 	"github.com/rendau/gms_temp/internal/domain/entities"
 	"github.com/rendau/gms_temp/internal/domain/util"
 )
+
+const NotificationWsChannelPrefixUsr = "usr#"
 
 type Notification struct {
 	r *St
@@ -18,25 +21,20 @@ func NewNotification(r *St) *Notification {
 	return &Notification{r: r}
 }
 
-func (c *Notification) SendRefreshProfile(usrIds []int64) {
-	if len(usrIds) == 0 {
-		return
-	}
-
-	c.r.ws.Send2Users(usrIds, map[string]string{
+func (c *Notification) SendRefreshProfile(usrId int64) {
+	c.r.ws.Send(NotificationWsChannelPrefixUsr+strconv.FormatInt(usrId, 10), map[string]string{
 		"type": cns.NfTypeRefreshProfile,
 	})
 }
 
-func (c *Notification) SendRefreshNumbers(usrIds []int64) {
+func (c *Notification) SendRefreshProfileMany(usrIds []int64) {
 	if len(usrIds) == 0 {
 		return
 	}
 
-	c.r.ws.Send2Users(
-		usrIds,
-		map[string]string{"type": cns.NfTypeRefreshNumbers},
-	)
+	for _, id := range usrIds {
+		c.SendRefreshProfile(id)
+	}
 }
 
 func (c *Notification) SendSmsBalanceAlarm(balance int64) {

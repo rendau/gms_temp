@@ -4,27 +4,25 @@ import (
 	"log"
 	"os"
 	"os/signal"
-	"strings"
 	"syscall"
 	"time"
 
 	memCache "github.com/rendau/gms_temp/internal/adapters/cache/mem"
 	"github.com/rendau/gms_temp/internal/adapters/cache/redis"
 	"github.com/rendau/gms_temp/internal/adapters/db/pg"
-	"github.com/rendau/gms_temp/internal/adapters/httpapi/metrics"
 	"github.com/rendau/gms_temp/internal/adapters/httpapi/rest"
+	"github.com/rendau/gms_temp/internal/adapters/jwts/jwts"
+	jwtsMock "github.com/rendau/gms_temp/internal/adapters/jwts/mock"
 	"github.com/rendau/gms_temp/internal/adapters/logger/zap"
 	smsMock "github.com/rendau/gms_temp/internal/adapters/sms/mock"
 	"github.com/rendau/gms_temp/internal/adapters/sms/smsc"
+	"github.com/rendau/gms_temp/internal/adapters/ws/cfugo"
 	wsMock "github.com/rendau/gms_temp/internal/adapters/ws/mock"
-	"github.com/rendau/gms_temp/internal/adapters/ws/websocket"
 	"github.com/rendau/gms_temp/internal/domain/core"
 	"github.com/rendau/gms_temp/internal/domain/usecases"
 	"github.com/rendau/gms_temp/internal/interfaces"
 	"github.com/spf13/viper"
 )
-
-const metricsHttpListen = ":9102"
 
 func Execute() {
 	var err error
@@ -34,107 +32,98 @@ func Execute() {
 	debug := viper.GetBool("debug")
 
 	app := struct {
-		lg         *zap.St
-		cache      interfaces.Cache
-		db         interfaces.Db
-		sms        interfaces.Sms
-		ws         interfaces.Ws
-		core       *core.St
-		ucs        *usecases.St
-		restApi    *rest.St
-		metricsApi *metrics.St
+		lg      *zap.St
+		cache   interfaces.Cache
+		db      interfaces.Db
+		jwts    interfaces.Jwts
+		sms     interfaces.Sms
+		ws      interfaces.Ws
+		core    *core.St
+		ucs     *usecases.St
+		restApi *rest.St
 	}{}
 
-	app.lg, err = zap.New(viper.GetString("log_level"), debug, false)
+	app.lg, err = zap.New(viper.GetString("LOG_LEVEL"), debug, false)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	if viper.GetString("redis.url") == "" {
+	if viper.GetString("REDIS_URL") == "" {
 		app.cache = memCache.New()
 	} else {
 		app.cache = redis.New(
 			app.lg,
-			viper.GetString("redis.url"),
-			viper.GetString("redis.psw"),
-			viper.GetInt("redis.db"),
+			viper.GetString("REDIS_URL"),
+			viper.GetString("REDIS_PSW"),
+			viper.GetInt("REDIS_DB"),
 		)
 	}
 
-	if viper.GetString("ms_sms_url") == "" {
+	app.db, err = pg.New(app.lg, viper.GetString("PG_DSN"), debug)
+	if err != nil {
+		app.lg.Fatal(err)
+	}
+
+	app.ucs = usecases.New(
+		app.lg,
+		app.db,
+	)
+
+	if viper.GetString("MS_JWTS_URL") == "" {
+		app.jwts = jwtsMock.New(app.lg, false)
+	} else {
+		app.jwts = jwts.New(
+			app.lg,
+			viper.GetString("MS_JWTS_URL"),
+		)
+	}
+
+	if viper.GetString("MS_SMS_URL") == "" {
 		app.sms = smsMock.New(app.lg, true)
 	} else {
 		app.sms = smsc.New(
 			app.lg,
-			viper.GetString("ms_sms_url"),
+			viper.GetString("MS_SMS_URL"),
 		)
 	}
 
-	if viper.GetString("ms_ws_url") == "" {
-		app.ws = wsMock.New()
+	if viper.GetString("MS_WS_URL") == "" {
+		app.ws = wsMock.New(app.lg, false)
 	} else {
-		app.ws = websocket.New(
+		app.ws = cfugo.New(
 			app.lg,
-			viper.GetString("ms_ws_url"),
+			viper.GetString("MS_WS_URL"),
+			viper.GetString("MS_WS_API_KEY"),
+			viper.GetString("MS_WS_CHANNEL_NS"),
 		)
-	}
-
-	app.db, err = pg.New(app.lg, viper.GetString("pg_dsn"), debug)
-	if err != nil {
-		app.lg.Fatal(err)
 	}
 
 	app.core = core.New(
 		app.lg,
 		app.cache,
 		app.db,
+		app.jwts,
 		app.sms,
 		app.ws,
 		debug,
 		false,
 	)
 
-	app.ucs = usecases.New(
-		app.lg,
-		app.db,
-		app.core,
-	)
-
-	withMetrics := viper.GetBool("metrics")
+	app.ucs.SetCore(app.core)
 
 	restApiEChan := make(chan error, 1)
 
 	app.restApi = rest.New(
 		app.lg,
-		viper.GetString("http_listen"),
+		viper.GetString("HTTP_LISTEN"),
 		app.ucs,
-		withMetrics,
 		restApiEChan,
+		viper.GetBool("HTTP_CORS"),
 	)
-
-	metricsApiEChan := make(chan error, 1)
-
-	if withMetrics {
-		app.metricsApi = metrics.New(
-			app.lg,
-			metricsHttpListen,
-			metricsApiEChan,
-		)
-	}
 
 	app.lg.Infow("Starting")
 
-	app.lg.Infow("http_listen " + viper.GetString("http_listen"))
-
-	if withMetrics {
-		app.lg.Infow("metrics_http_listen " + metricsHttpListen)
-	}
-
 	app.restApi.Start()
-
-	if app.metricsApi != nil {
-		app.metricsApi.Start()
-	}
 
 	stopSignalChan := make(chan os.Signal, 1)
 	signal.Notify(stopSignalChan, os.Interrupt, syscall.SIGTERM, syscall.SIGINT)
@@ -145,8 +134,6 @@ func Execute() {
 	case <-stopSignalChan:
 	case <-restApiEChan:
 		exitCode = 1
-	case <-metricsApiEChan:
-		exitCode = 1
 	}
 
 	app.lg.Infow("Shutting down...")
@@ -155,14 +142,6 @@ func Execute() {
 	if err != nil {
 		app.lg.Errorw("Fail to shutdown http-api", err)
 		exitCode = 1
-	}
-
-	if app.metricsApi != nil {
-		err = app.metricsApi.Shutdown(20 * time.Second)
-		if err != nil {
-			app.lg.Errorw("Fail to shutdown metrics-api", err)
-			exitCode = 1
-		}
 	}
 
 	app.lg.Infow("Wait routines...")
@@ -188,14 +167,4 @@ func loadConf() {
 	_ = viper.ReadInConfig()
 
 	viper.AutomaticEnv()
-
-	viper.Set("ms_sms_url", uriRPadSlash(viper.GetString("ms_sms_url")))
-	viper.Set("ms_ws_url", uriRPadSlash(viper.GetString("ms_ws_url")))
-}
-
-func uriRPadSlash(uri string) string {
-	if uri != "" && !strings.HasSuffix(uri, "/") {
-		return uri + "/"
-	}
-	return uri
 }

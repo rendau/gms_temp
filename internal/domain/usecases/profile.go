@@ -30,48 +30,69 @@ func (u *St) ProfileSendPhoneValidatingCode(ctx context.Context,
 }
 
 func (u *St) ProfileAuth(ctx context.Context,
-	obj *entities.PhoneAndSmsCodeSt) (int64, string, error) {
+	obj *entities.PhoneAndSmsCodeSt) (string, string, error) {
 	var err error
 
 	if ctx, err = u.db.ContextWithTransaction(ctx); err != nil {
-		return 0, "", err
+		return "", "", err
 	}
 	defer func() { u.db.RollbackContextTransaction(ctx) }()
 
-	id, token, err := u.cr.Usr.Auth(ctx, obj)
+	accessToken, refreshToken, err := u.cr.Usr.Auth(ctx, obj)
 	if err != nil {
-		return 0, "", err
+		return "", "", err
 	}
 
 	if err = u.db.CommitContextTransaction(ctx); err != nil {
-		return 0, "", err
+		return "", "", err
 	}
 
-	return id, token, nil
+	return accessToken, refreshToken, nil
+}
+
+func (u *St) ProfileAuthByRefreshToken(ctx context.Context,
+	token string) (string, error) {
+	var err error
+
+	if ctx, err = u.db.ContextWithTransaction(ctx); err != nil {
+		return "", err
+	}
+	defer func() { u.db.RollbackContextTransaction(ctx) }()
+
+	accessToken, err := u.cr.Usr.AuthByRefreshToken(ctx, token)
+	if err != nil {
+		return "", err
+	}
+
+	if err = u.db.CommitContextTransaction(ctx); err != nil {
+		return "", err
+	}
+
+	return accessToken, nil
 }
 
 func (u *St) ProfileReg(ctx context.Context,
-	obj *entities.UsrRegReqSt) (int64, string, error) {
+	obj *entities.UsrRegReqSt) (string, string, error) {
 	var err error
 
 	// restrict
 	obj.TypeId = util.NewInt(cns.UsrTypeUndefined)
 
 	if ctx, err = u.db.ContextWithTransaction(ctx); err != nil {
-		return 0, "", err
+		return "", "", err
 	}
 	defer func() { u.db.RollbackContextTransaction(ctx) }()
 
-	id, token, err := u.cr.Usr.Reg(ctx, obj)
+	accessToken, refreshToken, err := u.cr.Usr.Reg(ctx, obj)
 	if err != nil {
-		return 0, "", err
+		return "", "", err
 	}
 
 	if err = u.db.CommitContextTransaction(ctx); err != nil {
-		return 0, "", err
+		return "", "", err
 	}
 
-	return id, token, nil
+	return accessToken, refreshToken, nil
 }
 
 func (u *St) ProfileLogout(ctx context.Context) error {

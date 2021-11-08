@@ -10,29 +10,26 @@ import (
 )
 
 type St struct {
-	cors        bool
-	lg          interfaces.Logger
-	ucs         *usecases.St
-	withMetrics bool
-	eChan       chan<- error
+	lg    interfaces.Logger
+	ucs   *usecases.St
+	eChan chan<- error
+	cors  bool
 
 	server *http.Server
 }
 
 func New(
-	cors bool,
 	lg interfaces.Logger,
 	listen string,
 	ucs *usecases.St,
-	withMetrics bool,
 	eChan chan<- error,
+	cors bool,
 ) *St {
 	api := &St{
-		cors:        cors,
-		lg:          lg,
-		ucs:         ucs,
-		withMetrics: withMetrics,
-		eChan:       eChan,
+		lg:    lg,
+		ucs:   ucs,
+		eChan: eChan,
+		cors:  cors,
 	}
 
 	api.server = &http.Server{
@@ -47,6 +44,8 @@ func New(
 
 func (a *St) Start() {
 	go func() {
+		a.lg.Infow("Start rest-api", "addr", a.server.Addr)
+
 		err := a.server.ListenAndServe()
 		if err != nil && err != http.ErrServerClosed {
 			a.lg.Errorw("Http server closed", err)

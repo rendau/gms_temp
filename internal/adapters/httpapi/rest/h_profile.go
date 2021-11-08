@@ -54,8 +54,8 @@ func (a *St) hProfileAuth(w http.ResponseWriter, r *http.Request) {
 	type docRepSt struct {
 		// in:body
 		Body struct {
-			Id    int64  `json:"id"`
-			Token string `json:"token"`
+			AccessToken  string `json:"access_token"`
+			RefreshToken string `json:"refresh_token"`
 		}
 	}
 
@@ -64,15 +64,50 @@ func (a *St) hProfileAuth(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	usrId, token, err := a.ucs.ProfileAuth(a.uGetRequestContext(r), reqObj)
+	accessToken, refreshToken, err := a.ucs.ProfileAuth(a.uGetRequestContext(r), reqObj)
 	if a.uHandleError(err, r, w) {
 		return
 	}
 
-	a.uRespondJSON(w, struct {
-		Id    int64  `json:"id"`
-		Token string `json:"token"`
-	}{usrId, token})
+	a.uRespondJSON(w, map[string]string{
+		"access_token":  accessToken,
+		"refresh_token": refreshToken,
+	})
+}
+
+// swagger:route POST /profile/auth/token profile hProfileAuthToken
+// Авторизация.
+// Responses:
+//   200: profileAuthTokenRep
+//   400: errRep
+func (a *St) hProfileAuthToken(w http.ResponseWriter, r *http.Request) {
+	// swagger:parameters hProfileAuthToken
+	type docReqSt struct {
+		// in: body
+		Body entities.PhoneAndSmsCodeSt
+	}
+
+	// swagger:response profileAuthTokenRep
+	type docRepSt struct {
+		// in:body
+		Body struct {
+			AccessToken string `json:"access_token"`
+		}
+	}
+
+	reqObj := map[string]string{}
+	if !a.uParseRequestJSON(w, r, &reqObj) {
+		return
+	}
+
+	accessToken, err := a.ucs.ProfileAuthByRefreshToken(a.uGetRequestContext(r), reqObj["refresh_token"])
+	if a.uHandleError(err, r, w) {
+		return
+	}
+
+	a.uRespondJSON(w, map[string]string{
+		"access_token": accessToken,
+	})
 }
 
 // swagger:route POST /profile/reg profile hProfileReg
@@ -92,8 +127,8 @@ func (a *St) hProfileReg(w http.ResponseWriter, r *http.Request) {
 	type docRepSt struct {
 		// in:body
 		Body struct {
-			Id    int64  `json:"id"`
-			Token string `json:"token"`
+			AccessToken  string `json:"access_token"`
+			RefreshToken string `json:"refresh_token"`
 		}
 	}
 
@@ -102,15 +137,15 @@ func (a *St) hProfileReg(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	usrId, token, err := a.ucs.ProfileReg(a.uGetRequestContext(r), reqObj)
+	accessToken, refreshToken, err := a.ucs.ProfileReg(a.uGetRequestContext(r), reqObj)
 	if a.uHandleError(err, r, w) {
 		return
 	}
 
-	a.uRespondJSON(w, struct {
-		Id    int64  `json:"id"`
-		Token string `json:"token"`
-	}{usrId, token})
+	a.uRespondJSON(w, map[string]string{
+		"access_token":  accessToken,
+		"refresh_token": refreshToken,
+	})
 }
 
 // swagger:route POST /profile/logout profile hProfileLogout

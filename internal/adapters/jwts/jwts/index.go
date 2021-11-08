@@ -37,7 +37,10 @@ func (p *St) JwtCreate(sub string, expSeconds int64, payload map[string]interfac
 	}
 
 	data["sub"] = sub
-	data["exp_seconds"] = expSeconds
+
+	if expSeconds != 0 {
+		data["exp_seconds"] = expSeconds
+	}
 
 	dataRaw, err := json.Marshal(data)
 	if err != nil {

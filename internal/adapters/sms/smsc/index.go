@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/rendau/gms_temp/internal/interfaces"
@@ -22,7 +23,7 @@ type St struct {
 func New(lg interfaces.Logger, url string) *St {
 	return &St{
 		lg:         lg,
-		url:        url,
+		url:        strings.TrimRight(url, "/") + "/",
 		httpClient: &http.Client{Timeout: conTimeout},
 	}
 }
