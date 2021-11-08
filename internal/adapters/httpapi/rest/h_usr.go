@@ -62,11 +62,9 @@ func (a *St) hUsrList(w http.ResponseWriter, r *http.Request) {
 		pars.Ids = util.NewSliceInt64(*idPar)
 	}
 
-	offset, limit, page := a.uExtractPaginationPars(qPars)
-	pars.Offset = offset
-	pars.Limit = limit
+	a.uExtractPaginationPars(&pars.PaginationParams, qPars)
 
-	paginated := pars.Limit > 0
+	paginated := pars.PageSize > 0
 
 	result, tCount, err := a.ucs.UsrList(a.uGetRequestContext(r), pars)
 	if a.uHandleError(err, r, w) {
@@ -75,8 +73,8 @@ func (a *St) hUsrList(w http.ResponseWriter, r *http.Request) {
 
 	if paginated {
 		a.uRespondJSON(w, &PaginatedListRepSt{
-			Page:       page,
-			PageSize:   limit,
+			Page:       pars.Page,
+			PageSize:   pars.PageSize,
 			TotalCount: tCount,
 			Results:    result,
 		})

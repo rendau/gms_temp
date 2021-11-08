@@ -10,6 +10,7 @@ type St struct {
 	lg         interfaces.Logger
 	cache      interfaces.Cache
 	db         interfaces.Db
+	jwts       interfaces.Jwts
 	sms        interfaces.Sms
 	ws         interfaces.Ws
 	noSmsCheck bool
@@ -32,6 +33,7 @@ func New(
 	lg interfaces.Logger,
 	cache interfaces.Cache,
 	db interfaces.Db,
+	jwts interfaces.Jwts,
 	sms interfaces.Sms,
 	ws interfaces.Ws,
 	noSmsCheck bool,
@@ -41,6 +43,7 @@ func New(
 		lg:         lg,
 		cache:      cache,
 		db:         db,
+		jwts:       jwts,
 		sms:        sms,
 		ws:         ws,
 		noSmsCheck: noSmsCheck,

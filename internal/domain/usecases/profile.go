@@ -79,7 +79,7 @@ func (u *St) ProfileLogout(ctx context.Context) error {
 
 	ses := u.SessionGetFromContext(ctx)
 
-	if ses.ID == 0 {
+	if ses.Id == 0 {
 		return nil
 	}
 
@@ -88,7 +88,7 @@ func (u *St) ProfileLogout(ctx context.Context) error {
 	}
 	defer func() { u.db.RollbackContextTransaction(ctx) }()
 
-	err = u.cr.Usr.Logout(ctx, ses.ID)
+	err = u.cr.Usr.Logout(ctx, ses.Id)
 	if err != nil {
 		return err
 	}
@@ -109,7 +109,7 @@ func (u *St) ProfileGet(ctx context.Context) (*entities.UsrProfileSt, error) {
 		return nil, err
 	}
 
-	return u.cr.Usr.GetProfile(ctx, ses.ID)
+	return u.cr.Usr.GetProfile(ctx, ses.Id)
 }
 
 func (u *St) ProfileGetNumbers(ctx context.Context) (*entities.UsrNumbersSt, error) {
@@ -121,7 +121,7 @@ func (u *St) ProfileGetNumbers(ctx context.Context) (*entities.UsrNumbersSt, err
 		return nil, err
 	}
 
-	return u.cr.Usr.GetNumbers(ctx, ses.ID)
+	return u.cr.Usr.GetNumbers(ctx, ses.Id)
 }
 
 func (u *St) ProfileUpdate(ctx context.Context,
@@ -143,7 +143,7 @@ func (u *St) ProfileUpdate(ctx context.Context,
 	obj.TypeId = nil
 	obj.Phone = nil
 
-	err = u.cr.Usr.Update(ctx, ses.ID, obj)
+	err = u.cr.Usr.Update(ctx, ses.Id, obj)
 	if err != nil {
 		return err
 	}
@@ -170,7 +170,7 @@ func (u *St) ProfileChangePhone(ctx context.Context,
 	}
 	defer func() { u.db.RollbackContextTransaction(ctx) }()
 
-	err = u.cr.Usr.ChangePhone(ctx, ses.ID, obj)
+	err = u.cr.Usr.ChangePhone(ctx, ses.Id, obj)
 	if err != nil {
 		return err
 	}
@@ -183,7 +183,7 @@ func (u *St) ProfileChangePhone(ctx context.Context,
 }
 
 func (u *St) ProfileGetId(ctx context.Context) (int64, error) {
-	return u.SessionGetFromContext(ctx).ID, nil
+	return u.SessionGetFromContext(ctx).Id, nil
 }
 
 func (u *St) ProfileDelete(ctx context.Context) error {
@@ -200,7 +200,7 @@ func (u *St) ProfileDelete(ctx context.Context) error {
 	}
 	defer func() { u.db.RollbackContextTransaction(ctx) }()
 
-	err = u.cr.Usr.Delete(ctx, ses.ID)
+	err = u.cr.Usr.Delete(ctx, ses.Id)
 	if err != nil {
 		return err
 	}

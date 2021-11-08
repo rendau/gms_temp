@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/rendau/gms_temp/internal/domain/entities"
 	"github.com/rendau/gms_temp/internal/domain/errs"
 )
 
@@ -77,40 +78,38 @@ func (a *St) uLogErrorRequest(r *http.Request, err interface{}, msg string) {
 
 func (a *St) uGetRequestContext(r *http.Request) context.Context {
 	token := r.Header.Get("Authorization")
+
 	if token == "" { // try from query parameter
 		token = r.URL.Query().Get("auth_token")
+	} else {
+		if strings.HasPrefix(token, "Bearer ") {
+			token = token[7:]
+		} else {
+			token = ""
+		}
 	}
 
-	ctx := context.Background()
-
-	return a.ucs.SessionSetToContextByToken(ctx, token)
+	return a.ucs.SessionSetToContextByToken(nil, token)
 }
 
-func (a *St) uExtractPaginationPars(pars url.Values) (offset int64, limit int64, page int64) {
+func (a *St) uExtractPaginationPars(dst *entities.PaginationParams, pars url.Values) {
 	var err error
 
 	qPar := pars.Get("page_size")
 	if qPar != "" {
-		limit, err = strconv.ParseInt(qPar, 10, 64)
+		dst.PageSize, err = strconv.ParseInt(qPar, 10, 64)
 		if err != nil {
-			limit = 0
+			dst.PageSize = 0
 		}
 	}
 
 	qPar = pars.Get("page")
 	if qPar != "" {
-		page, err = strconv.ParseInt(qPar, 10, 64)
+		dst.Page, err = strconv.ParseInt(qPar, 10, 64)
 		if err != nil {
-			page = 0
+			dst.Page = 0
 		}
 	}
-	if page == 0 {
-		page = 1
-	}
-
-	offset = (page - 1) * limit
-
-	return offset, limit, page
 }
 
 func (a *St) uQpParseBool(values url.Values, key string) *bool {

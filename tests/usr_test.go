@@ -77,7 +77,7 @@ func TestAuth(t *testing.T) {
 	ses := app.ucs.SessionGet(context.Background(), token)
 	require.Nil(t, err)
 	require.NotNil(t, ses)
-	require.Equal(t, usrId, ses.ID)
+	require.Equal(t, usrId, ses.Id)
 	require.Equal(t, usrTypeId, ses.TypeId)
 
 	err = app.ucs.ProfileLogout(ctxWithSes(t, nil, usrId))
@@ -85,7 +85,7 @@ func TestAuth(t *testing.T) {
 
 	ses = app.ucs.SessionGet(context.Background(), token)
 	require.NotNil(t, ses)
-	require.Equal(t, int64(0), ses.ID)
+	require.Equal(t, int64(0), ses.Id)
 
 	usrCtx := app.ucs.SessionSetToContextByToken(context.Background(), token)
 
@@ -115,7 +115,7 @@ func TestAuth(t *testing.T) {
 	ses = app.ucs.SessionGet(context.Background(), token)
 	require.Nil(t, err)
 	require.NotNil(t, ses)
-	require.Equal(t, usrId, ses.ID)
+	require.Equal(t, usrId, ses.Id)
 	require.Equal(t, usrTypeId, ses.TypeId)
 
 	usrCtx = app.ucs.SessionSetToContextByToken(context.Background(), token)
@@ -340,7 +340,7 @@ func TestSessionChange(t *testing.T) {
 
 	ses := app.ucs.SessionGet(bgCtx, usrToken)
 	require.NotNil(t, ses)
-	require.Equal(t, usrId, ses.ID)
+	require.Equal(t, usrId, ses.Id)
 	require.Equal(t, cns.UsrTypeUndefined, ses.TypeId)
 
 	err = app.ucs.UsrUpdate(admCtx, usrId, &entities.UsrCUSt{
@@ -350,7 +350,7 @@ func TestSessionChange(t *testing.T) {
 
 	ses = app.ucs.SessionGet(bgCtx, usrToken)
 	require.NotNil(t, ses)
-	require.Equal(t, usrId, ses.ID)
+	require.Equal(t, usrId, ses.Id)
 	require.Equal(t, cns.UsrTypeAdmin, ses.TypeId)
 }
 
@@ -372,26 +372,26 @@ func TestSessionDelete(t *testing.T) {
 
 	ses := app.ucs.SessionGet(bgCtx, usrToken)
 	require.NotNil(t, ses)
-	require.Equal(t, usrId, ses.ID)
+	require.Equal(t, usrId, ses.Id)
 	require.Equal(t, cns.UsrTypeUndefined, ses.TypeId)
 
 	err = app.ucs.ProfileLogout(ctxWithSes(t, nil, usrId))
 	require.Nil(t, err)
 
 	ses = app.ucs.SessionGet(bgCtx, usrToken)
-	require.Equal(t, int64(0), ses.ID)
+	require.Equal(t, int64(0), ses.Id)
 
 	usrToken, err = app.core.Usr.GetOrCreateToken(bgCtx, usrId)
 	require.Nil(t, err)
 
 	ses = app.ucs.SessionGet(bgCtx, usrToken)
 	require.NotNil(t, ses)
-	require.Equal(t, usrId, ses.ID)
+	require.Equal(t, usrId, ses.Id)
 	require.Equal(t, cns.UsrTypeUndefined, ses.TypeId)
 
 	err = app.ucs.UsrDelete(admCtx, usrId)
 	require.Nil(t, err)
 
 	ses = app.ucs.SessionGet(bgCtx, usrToken)
-	require.Equal(t, int64(0), ses.ID)
+	require.Equal(t, int64(0), ses.Id)
 }

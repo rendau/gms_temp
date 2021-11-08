@@ -19,7 +19,7 @@ func (c *System) SmsBalanceAlarmCb(balance int64) {
 	c.r.Notification.SendSmsBalanceAlarm(balance)
 }
 
-// FilterUnusedFiles must return files (from 'filePaths') that are not exists in db any more, and must consider only specific directories
+// FilterUnusedFiles must return files (from 'filePaths') that are not exists in db anymore, and must check only specific directories
 func (c *System) FilterUnusedFiles(filePaths []string) []string {
 	var err error
 

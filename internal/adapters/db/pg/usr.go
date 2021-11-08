@@ -50,7 +50,7 @@ func (d *St) UsrList(ctx context.Context, pars *entities.UsrListParsSt) ([]*enti
 
 	var tCount int64
 
-	if pars.Limit > 0 || pars.OnlyCount {
+	if pars.PageSize > 0 || pars.OnlyCount {
 		err = d.DbQueryRowM(ctx, `select count(*)`+qFrom+qWhere, args).Scan(&tCount)
 		if err != nil {
 			return nil, 0, d.handleError(ctx, err)
@@ -60,8 +60,8 @@ func (d *St) UsrList(ctx context.Context, pars *entities.UsrListParsSt) ([]*enti
 			return nil, tCount, nil
 		}
 
-		qOffset = ` offset ` + strconv.FormatInt(pars.Offset, 10)
-		qLimit = ` limit ` + strconv.FormatInt(pars.Limit, 10)
+		qOffset = ` offset ` + strconv.FormatInt(pars.Page*pars.PageSize, 10)
+		qLimit = ` limit ` + strconv.FormatInt(pars.PageSize, 10)
 	}
 
 	qSelect := `
@@ -240,25 +240,6 @@ func (d *St) UsrSetToken(ctx context.Context, id int64, token string) error {
 	}
 
 	return nil
-}
-
-func (d *St) UsrGetIdForToken(ctx context.Context, token string) (int64, error) {
-	var result int64
-
-	err := d.DbQueryRow(ctx, `
-		select id
-		from usr
-		where token = $1
-	`, token).Scan(&result)
-	if err != nil {
-		if err == pgx.ErrNoRows {
-			return 0, nil
-		}
-
-		return 0, d.handleError(ctx, err)
-	}
-
-	return result, nil
 }
 
 func (d *St) UsrGetTypeId(ctx context.Context, id int64) (int, error) {

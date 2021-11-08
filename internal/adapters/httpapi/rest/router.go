@@ -85,8 +85,6 @@ func (a *St) router() http.Handler {
 	})
 	r.PathPrefix("/doc/").Handler(http.StripPrefix("/doc/", http.FileServer(http.Dir("./doc/"))))
 
-	r.HandleFunc("/healthcheck", a.hHealthCheck).Methods("GET")
-
 	// system
 	r.HandleFunc("/mss/sms/balance/alarm", a.hSystemSmsBalanceAlarm).Methods("POST")
 	r.HandleFunc("/mss/fs/filter_unused_files", a.hSystemFilterUnusedFiles).Methods("PUT")

@@ -24,7 +24,6 @@ type Db interface {
 	UsrPhoneExists(ctx context.Context, phone string, excludeId int64) (bool, error)
 	UsrGetToken(ctx context.Context, id int64) (string, error)
 	UsrSetToken(ctx context.Context, id int64, token string) error
-	UsrGetIdForToken(ctx context.Context, token string) (int64, error)
 	UsrGetTypeId(ctx context.Context, id int64) (int, error)
 	UsrGetPhone(ctx context.Context, id int64) (string, error)
 	UsrGetIdForPhone(ctx context.Context, phone string) (int64, error)

@@ -196,7 +196,7 @@ func (c *Usr) Get(ctx context.Context, pars *entities.UsrGetParsSt, errNE bool) 
 
 	var result *entities.UsrSt
 
-	if pars.Id != nil || pars.Phone != nil || pars.Token != nil {
+	if pars.Id != nil || pars.Phone != nil {
 		result, err = c.r.db.UsrGet(ctx, pars)
 		if err != nil {
 			return nil, err
@@ -230,22 +230,6 @@ func (c *Usr) GetToken(ctx context.Context, id int64) (string, error) {
 	return c.r.db.UsrGetToken(ctx, id)
 }
 
-func (c *Usr) GetOrCreateToken(ctx context.Context, id int64) (string, error) {
-	token, err := c.r.db.UsrGetToken(ctx, id)
-	if err != nil {
-		return "", err
-	}
-
-	if token == "" {
-		token, err = c.GenerateAndSaveToken(ctx, id)
-		if err != nil {
-			return "", err
-		}
-	}
-
-	return token, nil
-}
-
 func (c *Usr) GenerateAndSaveToken(ctx context.Context, id int64) (string, error) {
 	tokenSrc := fmt.Sprintf("auth-lt-token %d %s", id, time.Now())
 	token := fmt.Sprintf("%x", sha512.Sum512([]byte(tokenSrc)))
@@ -264,28 +248,11 @@ func (c *Usr) SetToken(ctx context.Context, id int64, v string) error {
 		return err
 	}
 
-	c.r.Session.Delete(id)
-
 	return nil
 }
 
 func (c *Usr) ResetToken(ctx context.Context, id int64) error {
 	return c.SetToken(ctx, id, "")
-}
-
-func (c *Usr) GetIdForToken(ctx context.Context, token string, errNE bool) (int64, error) {
-	var err error
-
-	id, err := c.r.db.UsrGetIdForToken(ctx, token)
-	if err != nil {
-		return 0, err
-	}
-
-	if id == 0 && errNE {
-		return 0, errs.ObjectNotFound
-	}
-
-	return id, nil
 }
 
 func (c *Usr) GetTypeId(ctx context.Context, id int64) (int, error) {
@@ -329,37 +296,24 @@ func (c *Usr) Auth(ctx context.Context, obj *entities.PhoneAndSmsCodeSt) (int64,
 		return 0, "", err
 	}
 
-	id, err := c.GetIdForPhone(ctx, obj.Phone, true)
+	usr, err := c.Get(ctx, &entities.UsrGetParsSt{
+		Phone: &obj.Phone,
+	}, true)
 	if err != nil {
 		return 0, "", err
 	}
 
-	token, err := c.GetOrCreateToken(ctx, id)
+	token, err := c.r.Session.CreateToken(&entities.Session{
+		Id:     usr.Id,
+		TypeId: usr.TypeId,
+	})
 	if err != nil {
 		return 0, "", err
 	}
 
 	c.RemovePhoneValidatingCache(ctx, obj.Phone)
 
-	return id, token, nil
-}
-
-// AuthByToken returns: usrId, usrTypeId, error
-func (c *Usr) AuthByToken(ctx context.Context, token string) (int64, int, error) {
-	if token == "" {
-		return 0, 0, errs.NotAuthorized
-	}
-
-	usr, err := c.Get(ctx, &entities.UsrGetParsSt{Token: &token}, false)
-	if err != nil {
-		return 0, 0, err
-	}
-
-	if usr == nil {
-		return 0, 0, errs.NotAuthorized
-	}
-
-	return usr.Id, usr.TypeId, nil
+	return usr.Id, token, nil
 }
 
 func (c *Usr) Reg(ctx context.Context, data *entities.UsrRegReqSt) (int64, string, error) {
@@ -392,7 +346,17 @@ func (c *Usr) Reg(ctx context.Context, data *entities.UsrRegReqSt) (int64, strin
 		return 0, "", err
 	}
 
-	token, err := c.GenerateAndSaveToken(ctx, id)
+	newUsr, err := c.Get(ctx, &entities.UsrGetParsSt{
+		Id: &id,
+	}, true)
+	if err != nil {
+		return 0, "", err
+	}
+
+	token, err := c.r.Session.CreateToken(&entities.Session{
+		Id:     newUsr.Id,
+		TypeId: newUsr.TypeId,
+	})
 	if err != nil {
 		return 0, "", err
 	}
@@ -500,8 +464,6 @@ func (c *Usr) Update(ctx context.Context, id int64, obj *entities.UsrCUSt) error
 		return err
 	}
 
-	c.r.Session.Delete(id)
-
 	return nil
 }
 
@@ -531,7 +493,7 @@ func (c *Usr) ChangePhone(ctx context.Context, id int64, obj *entities.PhoneAndS
 }
 
 func (c *Usr) Logout(ctx context.Context, id int64) error {
-	return c.ResetToken(ctx, id)
+	return nil
 }
 
 func (c *Usr) Delete(ctx context.Context, id int64) error {
@@ -539,8 +501,6 @@ func (c *Usr) Delete(ctx context.Context, id int64) error {
 	if err != nil {
 		return err
 	}
-
-	c.r.Session.Delete(id)
 
 	return nil
 }

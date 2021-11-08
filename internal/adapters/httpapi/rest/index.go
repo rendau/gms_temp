@@ -10,6 +10,7 @@ import (
 )
 
 type St struct {
+	cors        bool
 	lg          interfaces.Logger
 	ucs         *usecases.St
 	withMetrics bool
@@ -19,6 +20,7 @@ type St struct {
 }
 
 func New(
+	cors bool,
 	lg interfaces.Logger,
 	listen string,
 	ucs *usecases.St,
@@ -26,6 +28,7 @@ func New(
 	eChan chan<- error,
 ) *St {
 	api := &St{
+		cors:        cors,
 		lg:          lg,
 		ucs:         ucs,
 		withMetrics: withMetrics,

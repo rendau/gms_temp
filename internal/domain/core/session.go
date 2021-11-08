@@ -2,16 +2,17 @@ package core
 
 import (
 	"context"
-	"fmt"
+	"encoding/base64"
+	"encoding/json"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/rendau/gms_temp/internal/domain/entities"
 )
 
 const sessionContextKey = "user_session"
-
-const sessionCacheKeyPattern = "user_session_%s"
-const sessionCacheDuration = 20 * time.Minute
+const sessionDur = int64(600 * time.Second)
 
 type Session struct {
 	r *St
@@ -21,54 +22,31 @@ func NewSession(r *St) *Session {
 	return &Session{r: r}
 }
 
-func (c *Session) Get(ctx context.Context, token string) *entities.Session {
-	var err error
+func (c *Session) GetFromToken(token string) *entities.Session {
+	tokenParts := strings.Split(token, ".")
+	if len(tokenParts) == 3 {
+		if claimsRaw, err := base64.RawURLEncoding.DecodeString(tokenParts[1]); err == nil {
+			claims := entities.JwtClaimsSt{}
 
-	result := &entities.Session{}
+			err = json.Unmarshal(claimsRaw, &claims)
+			if err != nil {
+				claims = entities.JwtClaimsSt{}
+			}
 
-	if token == "" {
-		return result
-	}
+			claims.Id, _ = strconv.ParseInt(claims.Sub, 10, 64)
 
-	cacheKey := fmt.Sprintf(sessionCacheKeyPattern, token)
-
-	if cacheV := c.getFromCache(cacheKey); cacheV != nil {
-		return cacheV
-	}
-
-	result.ID, result.TypeId, err = c.r.Usr.AuthByToken(ctx, token)
-	if err != nil {
-		return result
-	}
-
-	c.setToCache(cacheKey, result)
-
-	return result
-}
-
-func (c *Session) Delete(id int64) {
-	if c.deleteUsrIdFromCache(id) {
-		c.r.Notification.SendRefreshProfile([]int64{id})
-	}
-}
-
-func (c *Session) DeleteMany(ids []int64) {
-	if len(ids) == 0 {
-		return
-	}
-
-	var nfIds []int64
-
-	for _, id := range ids {
-		if c.deleteUsrIdFromCache(id) {
-			nfIds = append(nfIds, id)
+			return &claims.Session
 		}
 	}
 
-	c.r.Notification.SendRefreshProfile(nfIds)
+	return &entities.Session{}
 }
 
 func (c *Session) SetToContext(ctx context.Context, ses *entities.Session) context.Context {
+	if ctx == nil {
+		ctx = context.Background()
+	}
+
 	return context.WithValue(ctx, sessionContextKey, ses)
 }
 
@@ -87,39 +65,14 @@ func (c *Session) GetFromContext(ctx context.Context) *entities.Session {
 	}
 }
 
-func (c *Session) getFromCache(key string) *entities.Session {
-	result := &entities.Session{}
+func (c *Session) CreateToken(ses *entities.Session) (string, error) {
+	token, _ := c.r.jwts.JwtCreate(
+		strconv.FormatInt(ses.Id, 10),
+		sessionDur,
+		map[string]interface{}{
+			"type_id": ses.TypeId,
+		},
+	)
 
-	ok, err := c.r.cache.GetJsonObj(key, &result)
-	if err != nil {
-		return nil
-	}
-	if !ok {
-		return nil
-	}
-
-	return result
-}
-
-func (c *Session) setToCache(key string, v *entities.Session) {
-	_ = c.r.cache.SetJsonObj(key, v, sessionCacheDuration)
-}
-
-func (c *Session) deleteUsrIdFromCache(id int64) bool {
-	keys := c.r.cache.Keys(fmt.Sprintf(sessionCacheKeyPattern, "*"))
-
-	found := false
-
-	for _, key := range keys {
-		ses := entities.Session{}
-		if sesFound, _ := c.r.cache.GetJsonObj(key, &ses); sesFound {
-			if ses.ID == id {
-				_ = c.r.cache.Del(key)
-
-				found = true
-			}
-		}
-	}
-
-	return found
+	return token, nil
 }

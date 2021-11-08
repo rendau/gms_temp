@@ -8,12 +8,12 @@ import (
 	"github.com/rendau/gms_temp/internal/domain/errs"
 )
 
-func (u *St) SessionGet(ctx context.Context, token string) *entities.Session {
-	return u.cr.Session.Get(ctx, token)
+func (u *St) SessionGetFromToken(token string) *entities.Session {
+	return u.cr.Session.GetFromToken(token)
 }
 
 func (u *St) SessionRequireAuth(ses *entities.Session) error {
-	if ses.ID == 0 {
+	if ses.Id == 0 {
 		return errs.NotAuthorized
 	}
 
@@ -46,7 +46,7 @@ func (u *St) SessionSetToContext(ctx context.Context, ses *entities.Session) con
 }
 
 func (u *St) SessionSetToContextByToken(ctx context.Context, token string) context.Context {
-	return u.cr.Session.SetToContext(ctx, u.SessionGet(ctx, token))
+	return u.cr.Session.SetToContext(ctx, u.SessionGetFromToken(token))
 }
 
 func (u *St) SessionGetFromContext(ctx context.Context) *entities.Session {
