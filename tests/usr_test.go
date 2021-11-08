@@ -81,46 +81,7 @@ func TestAuth(t *testing.T) {
 	require.Equal(t, usrId, ses.Id)
 	require.Equal(t, usrTypeId, ses.TypeId)
 
-	err = app.ucs.ProfileLogout(ctxWithSes(t, nil, usrId))
-	require.Nil(t, err)
-
-	ses = app.ucs.SessionGetFromToken(accessToken)
-	require.NotNil(t, ses)
-	require.Equal(t, int64(0), ses.Id)
-
 	usrCtx := app.ucs.SessionSetToContextByToken(context.Background(), accessToken)
-
-	_, err = app.ucs.ProfileGet(usrCtx)
-	require.Equal(t, errs.NotAuthorized, err)
-
-	err = app.ucs.ProfileSendPhoneValidatingCode(
-		bgCtx,
-		usrPhone,
-		true,
-	)
-	require.Nil(t, err)
-
-	smsCode = app.sms.PullCode()
-	require.Greater(t, smsCode, 0)
-
-	accessToken, refreshToken, err = app.ucs.ProfileAuth(
-		bgCtx,
-		&entities.PhoneAndSmsCodeSt{
-			Phone:   usrPhone,
-			SmsCode: smsCode,
-		},
-	)
-	require.Nil(t, err)
-	require.NotEmpty(t, accessToken)
-	require.NotEmpty(t, refreshToken)
-
-	ses = app.ucs.SessionGetFromToken(accessToken)
-	require.Nil(t, err)
-	require.NotNil(t, ses)
-	require.Equal(t, usrId, ses.Id)
-	require.Equal(t, usrTypeId, ses.TypeId)
-
-	usrCtx = app.ucs.SessionSetToContextByToken(context.Background(), accessToken)
 
 	profile, err := app.ucs.ProfileGet(usrCtx)
 	require.Nil(t, err)
@@ -179,7 +140,7 @@ func TestReg(t *testing.T) {
 			}
 		}
 
-		id, _, err := app.ucs.ProfileReg(
+		accessToken, _, err := app.ucs.ProfileReg(
 			context.Background(),
 			&entities.UsrRegReqSt{
 				PhoneAndSmsCodeSt: entities.PhoneAndSmsCodeSt{
@@ -191,7 +152,7 @@ func TestReg(t *testing.T) {
 		)
 		require.Equal(t, c.e, err, cI)
 		if c.e == nil {
-			require.Greater(t, id, int64(0))
+			require.NotEmpty(t, accessToken)
 			require.Nil(t, err, cI)
 		}
 	}
@@ -206,7 +167,7 @@ func TestReg(t *testing.T) {
 	smsCode = app.sms.PullCode()
 	require.Greater(t, smsCode, 0)
 
-	id, token, err := app.ucs.ProfileReg(
+	accessToken, _, err := app.ucs.ProfileReg(
 		context.Background(),
 		&entities.UsrRegReqSt{
 			PhoneAndSmsCodeSt: entities.PhoneAndSmsCodeSt{
@@ -219,12 +180,11 @@ func TestReg(t *testing.T) {
 	)
 	require.Nil(t, err)
 
-	usrCtx := app.ucs.SessionSetToContextByToken(context.Background(), token)
+	usrCtx := app.ucs.SessionSetToContextByToken(context.Background(), accessToken)
 
 	profile, err := app.ucs.ProfileGet(usrCtx)
 	require.Nil(t, err)
 	require.NotNil(t, profile)
-	require.Equal(t, id, profile.Id)
 	require.Equal(t, "73330000045", profile.Phone)
 	require.Equal(t, cns.UsrTypeUndefined, profile.TypeId)
 	require.Equal(t, "/path_to_ava", profile.Ava)

@@ -20,6 +20,8 @@ func New(lg interfaces.Logger, testing bool) *St {
 }
 
 func (p *St) JwtCreate(sub string, expSeconds int64, payload map[string]interface{}) (string, error) {
+	payload["sub"] = sub
+
 	payloadRaw, err := json.Marshal(payload)
 	if err != nil {
 		p.lg.Errorw("Fail to marshal data", err)
