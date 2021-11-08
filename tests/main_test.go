@@ -7,6 +7,7 @@ import (
 
 	"github.com/rendau/gms_temp/internal/adapters/cache/mem"
 	"github.com/rendau/gms_temp/internal/adapters/db/pg"
+	jwtsMock "github.com/rendau/gms_temp/internal/adapters/jwts/mock"
 	"github.com/rendau/gms_temp/internal/adapters/logger/zap"
 	smsMock "github.com/rendau/gms_temp/internal/adapters/sms/mock"
 	wsMock "github.com/rendau/gms_temp/internal/adapters/ws/mock"
@@ -18,7 +19,7 @@ import (
 func TestMain(m *testing.M) {
 	var err error
 
-	viper.SetConfigFile("test_conf.yml")
+	viper.SetConfigFile("conf.yml")
 	_ = viper.ReadInConfig()
 
 	viper.AutomaticEnv()
@@ -40,25 +41,29 @@ func TestMain(m *testing.M) {
 		app.lg.Fatal(err)
 	}
 
+	app.ucs = usecases.New(
+		app.lg,
+		app.db,
+	)
+
+	app.jwts = jwtsMock.New(app.lg, false)
+
 	app.sms = smsMock.New(app.lg, false)
 
-	app.ws = wsMock.New()
+	app.ws = wsMock.New(app.lg, true)
 
 	app.core = core.New(
 		app.lg,
 		app.cache,
 		app.db,
+		app.jwts,
 		app.sms,
 		app.ws,
 		false,
 		true,
 	)
 
-	app.ucs = usecases.New(
-		app.lg,
-		app.db,
-		app.core,
-	)
+	app.ucs.SetCore(app.core)
 
 	resetDb()
 

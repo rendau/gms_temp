@@ -6,6 +6,5 @@
 release/*
 build/
 conf.yml
-test_conf.yml
 .migrate_scripts
 /svc

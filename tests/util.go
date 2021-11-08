@@ -76,8 +76,11 @@ func ctxWithSes(t *testing.T, ctx context.Context, usrId int64) context.Context 
 		ctx = context.Background()
 	}
 
-	token, err := app.core.Usr.GetOrCreateToken(ctx, usrId)
+	typeId, err := app.core.Usr.GetTypeId(ctx, usrId)
 	require.Nil(t, err)
 
-	return app.ucs.SessionSetToContextByToken(ctx, token)
+	return app.ucs.SessionSetToContext(ctx, &entities.Session{
+		Id:     usrId,
+		TypeId: typeId,
+	})
 }

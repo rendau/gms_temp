@@ -29,7 +29,7 @@ func Execute() {
 
 	loadConf()
 
-	debug := viper.GetBool("debug")
+	debug := viper.GetBool("DEBUG")
 
 	app := struct {
 		lg      *zap.St
@@ -156,8 +156,7 @@ func Execute() {
 func loadConf() {
 	viper.SetDefault("debug", "false")
 	viper.SetDefault("http_listen", ":80")
-	viper.SetDefault("log_level", "debug")
-	viper.SetDefault("metrics", "false")
+	viper.SetDefault("log_level", "info")
 
 	confFilePath := os.Getenv("CONF_PATH")
 	if confFilePath == "" {
