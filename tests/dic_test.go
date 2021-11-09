@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"testing"
 
+	"github.com/rendau/gms_temp/internal/cns"
 	"github.com/rendau/gms_temp/internal/domain/entities"
 	"github.com/rendau/gms_temp/internal/domain/errs"
 	"github.com/stretchr/testify/require"
@@ -14,7 +15,10 @@ func TestDic(t *testing.T) {
 	prepareDbForNewTest()
 
 	bgCtx := context.Background()
-	admCtx := ctxWithSes(t, nil, admId)
+	admCtx := app.ucs.SessionSetToContext(context.Background(), &entities.Session{
+		Id:    1,
+		Roles: []string{cns.RoleAdmin},
+	})
 
 	dicHs, dicJson, err := app.ucs.DicGetJson(bgCtx, "")
 	require.Nil(t, err)
@@ -62,8 +66,14 @@ func TestCfg(t *testing.T) {
 	prepareDbForNewTest()
 
 	bgCtx := context.Background()
-	admCtx := ctxWithSes(t, nil, admId)
-	usr1Ctx := ctxWithSes(t, nil, usr1Id)
+	guestCtx := app.ucs.SessionSetToContext(context.Background(), &entities.Session{
+		Id:    1,
+		Roles: []string{cns.RoleGuest},
+	})
+	admCtx := app.ucs.SessionSetToContext(context.Background(), &entities.Session{
+		Id:    1,
+		Roles: []string{cns.RoleAdmin},
+	})
 
 	cfg, err := app.ucs.ConfigGet(bgCtx)
 	require.Nil(t, err)
@@ -74,7 +84,7 @@ func TestCfg(t *testing.T) {
 	err = app.ucs.ConfigSet(bgCtx, &entities.ConfigSt{})
 	require.Equal(t, errs.NotAuthorized, err)
 
-	err = app.ucs.ConfigSet(usr1Ctx, &entities.ConfigSt{})
+	err = app.ucs.ConfigSet(guestCtx, &entities.ConfigSt{})
 	require.Equal(t, errs.PermissionDenied, err)
 
 	err = app.ucs.ConfigSet(admCtx, &entities.ConfigSt{

@@ -1,4 +1,4 @@
-basePath: /api
+basePath: /
 consumes:
 - application/json
 definitions:
@@ -22,11 +22,11 @@ definitions:
     properties:
       config:
         $ref: '#/definitions/ConfigSt'
-      usr_types:
+      roles:
         items:
-          $ref: '#/definitions/UsrTypeSt'
+          $ref: '#/definitions/RoleSt'
         type: array
-        x-go-name: UsrTypes
+        x-go-name: Roles
     type: object
     x-go-package: github.com/rendau/gms_temp/internal/domain/entities
   ErrRepSt:
@@ -48,6 +48,16 @@ definitions:
         x-go-name: SmsCode
     type: object
     x-go-package: github.com/rendau/gms_temp/internal/domain/entities
+  RoleSt:
+    properties:
+      id:
+        type: string
+        x-go-name: Id
+      name:
+        type: string
+        x-go-name: Name
+    type: object
+    x-go-package: github.com/rendau/gms_temp/internal/domain/entities
   UsrCUSt:
     properties:
       ava:
@@ -59,10 +69,11 @@ definitions:
       phone:
         type: string
         x-go-name: Phone
-      type_id:
-        format: int64
-        type: integer
-        x-go-name: TypeId
+      roles:
+        items:
+          type: string
+        type: array
+        x-go-name: Roles
     type: object
     x-go-package: github.com/rendau/gms_temp/internal/domain/entities
   UsrListSt:
@@ -84,10 +95,11 @@ definitions:
       phone:
         type: string
         x-go-name: Phone
-      type_id:
-        format: int64
-        type: integer
-        x-go-name: TypeId
+      roles:
+        items:
+          type: string
+        type: array
+        x-go-name: Roles
     type: object
     x-go-package: github.com/rendau/gms_temp/internal/domain/entities
   UsrNumbersSt:
@@ -112,10 +124,11 @@ definitions:
       phone:
         type: string
         x-go-name: Phone
-      type_id:
-        format: int64
-        type: integer
-        x-go-name: TypeId
+      roles:
+        items:
+          type: string
+        type: array
+        x-go-name: Roles
     type: object
     x-go-package: github.com/rendau/gms_temp/internal/domain/entities
   UsrRegReqSt:
@@ -129,14 +142,15 @@ definitions:
       phone:
         type: string
         x-go-name: Phone
+      roles:
+        items:
+          type: string
+        type: array
+        x-go-name: Roles
       sms_code:
         format: int64
         type: integer
         x-go-name: SmsCode
-      type_id:
-        format: int64
-        type: integer
-        x-go-name: TypeId
     type: object
     x-go-package: github.com/rendau/gms_temp/internal/domain/entities
   UsrSt:
@@ -158,24 +172,14 @@ definitions:
       phone:
         type: string
         x-go-name: Phone
-      type_id:
-        format: int64
-        type: integer
-        x-go-name: TypeId
+      roles:
+        items:
+          type: string
+        type: array
+        x-go-name: Roles
     type: object
     x-go-package: github.com/rendau/gms_temp/internal/domain/entities
-  UsrTypeSt:
-    properties:
-      id:
-        format: int64
-        type: integer
-        x-go-name: Id
-      name:
-        type: string
-        x-go-name: Name
-    type: object
-    x-go-package: github.com/rendau/gms_temp/internal/domain/entities
-host: gms_temp.com
+host: api.gms_temp.com
 info:
   description: |-
     <br/><details>
@@ -196,14 +200,14 @@ info:
 
     <details>
     <summary>**Работа с фото и файлами**</summary>
-    [Документация файлового сервера](http://gms_temp.com/fs/doc/)<br/>
+    [Документация файлового сервера](http://api.gms_temp.com/fs/doc/)<br/>
     Для заливки файлов на сервер необходимо указывать наименование папки (dir). Наименование нужно брать из констант
     </details>
 
     <details>
     <summary>**Websocket**</summary>
 
-    websocket доступен по адресу `wss://gms_temp.com/websocket?auth_token=<token>`
+    websocket доступен по адресу `wss://ws.gms_temp.com?auth_token=<token>`
     </details>
   title: GmsTemp API.
   version: 1.0.0
@@ -263,7 +267,7 @@ paths:
     put:
       operationId: hProfileUpdate
       parameters:
-      - description: '`type_id`, `phone` игнорируются'
+      - description: '`role`, `phone` игнорируются'
         in: body
         name: Body
         schema:
@@ -289,6 +293,22 @@ paths:
       responses:
         "200":
           $ref: '#/responses/profileAuthRep'
+        "400":
+          $ref: '#/responses/errRep'
+      summary: Авторизация.
+      tags:
+      - profile
+  /profile/auth/token:
+    post:
+      operationId: hProfileAuthToken
+      parameters:
+      - in: body
+        name: Body
+        schema:
+          $ref: '#/definitions/PhoneAndSmsCodeSt'
+      responses:
+        "200":
+          $ref: '#/responses/profileAuthTokenRep'
         "400":
           $ref: '#/responses/errRep'
       summary: Авторизация.
@@ -361,7 +381,7 @@ paths:
     post:
       operationId: hProfileReg
       parameters:
-      - description: '`type_id` игнорируется'
+      - description: '`role` игнорируется'
         in: body
         name: Body
         schema:
@@ -408,17 +428,20 @@ paths:
         in: query
         name: page
         type: integer
-        x-go-name: Offset
+        x-go-name: Page
       - format: int64
         in: query
         name: page_size
         type: integer
-        x-go-name: Limit
-      - format: int64
-        in: query
-        name: type_id
-        type: integer
-        x-go-name: TypeId
+        x-go-name: PageSize
+      - in: query
+        name: role
+        type: string
+        x-go-name: Role
+      - in: query
+        name: roles
+        type: string
+        x-go-name: Roles
       - in: query
         name: only_count
         type: boolean
@@ -537,13 +560,20 @@ responses:
     description: ""
     schema:
       properties:
-        id:
-          format: int64
-          type: integer
-          x-go-name: Id
-        token:
+        access_token:
           type: string
-          x-go-name: Token
+          x-go-name: AccessToken
+        refresh_token:
+          type: string
+          x-go-name: RefreshToken
+      type: object
+  profileAuthTokenRep:
+    description: ""
+    schema:
+      properties:
+        access_token:
+          type: string
+          x-go-name: AccessToken
       type: object
   profileIdRep:
     description: ""
@@ -562,13 +592,12 @@ responses:
     description: ""
     schema:
       properties:
-        id:
-          format: int64
-          type: integer
-          x-go-name: Id
-        token:
+        access_token:
           type: string
-          x-go-name: Token
+          x-go-name: AccessToken
+        refresh_token:
+          type: string
+          x-go-name: RefreshToken
       type: object
   profileRep:
     description: ""
@@ -614,7 +643,7 @@ schemes:
 - http
 securityDefinitions:
   token:
-    description: 'Пример: `Authorization: 2cf24dba5fb0a30e26e83b2`'
+    description: 'Пример: `Authorization: Bearer 2cf24dba5fb0a30e26e83b2`'
     in: header
     name: Authorization
     type: apiKey

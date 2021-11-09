@@ -13,24 +13,13 @@ var (
 	AppTimeLocation = time.FixedZone("AST", 21600) // +0600
 )
 
-// Static file directories
+// Roles
 const (
-	SFDUsrAva = "usr_avatar"
+	RoleGuest = "guest"
+	RoleAdmin = "admin"
 )
 
-// Usr types
-const (
-	UsrTypeUndefined = 0
-	UsrTypeAdmin     = 1
-)
-
-func UsrTypeIsValid(v int) bool {
-	return v == UsrTypeUndefined ||
-		v == UsrTypeAdmin
+func RoleIsValid(v string) bool {
+	return v == RoleGuest ||
+		v == RoleAdmin
 }
-
-// Notification types
-const (
-	NfTypeRefreshProfile = "refresh-profile"
-	NfTypeRefreshNumbers = "refresh-numbers"
-)

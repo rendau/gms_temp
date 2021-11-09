@@ -53,6 +53,8 @@ func New(lg interfaces.Logger, dsn string, debug bool) (*St, error) {
 	dbConfig.HealthCheckPeriod = 20 * time.Second
 	dbConfig.LazyConnect = true
 
+	dbConfig.ConnConfig.RuntimeParams["timezone"] = "Asia/Almaty"
+
 	dbPool, err := pgxpool.ConnectConfig(context.Background(), dbConfig)
 	if err != nil {
 		lg.Errorw(ErrMsg+": Fail to connect to db", err)

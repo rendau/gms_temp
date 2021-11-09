@@ -1,8 +1,8 @@
 package entities
 
 type Session struct {
-	Id     int64 `json:"id"`
-	TypeId int   `json:"type_id"`
+	Id    int64    `json:"id"`
+	Roles []string `json:"roles"`
 }
 
 type JwtClaimsSt struct {

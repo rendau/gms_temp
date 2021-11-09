@@ -35,6 +35,10 @@ func (c *Session) GetFromToken(token string) *entities.Session {
 
 			claims.Id, _ = strconv.ParseInt(claims.Sub, 10, 64)
 
+			if claims.Roles == nil {
+				claims.Roles = make([]string, 0)
+			}
+
 			return &claims.Session
 		}
 	}
@@ -70,7 +74,7 @@ func (c *Session) CreateToken(ses *entities.Session) (string, error) {
 		strconv.FormatInt(ses.Id, 10),
 		sessionDur,
 		map[string]interface{}{
-			"type_id": ses.TypeId,
+			"role": ses.Roles,
 		},
 	)
 

@@ -7,26 +7,20 @@ import (
 )
 
 type St struct {
-	lg         interfaces.Logger
-	cache      interfaces.Cache
-	db         interfaces.Db
-	jwts       interfaces.Jwts
-	sms        interfaces.Sms
-	ws         interfaces.Ws
-	noSmsCheck bool
-	testing    bool
+	lg      interfaces.Logger
+	cache   interfaces.Cache
+	db      interfaces.Db
+	jwts    interfaces.Jwts
+	testing bool
 
 	wg sync.WaitGroup
 
 	Config *Config
 
-	Dic     *Dic
-	UsrType *UsrType
+	Dic *Dic
 
-	System       *System
-	Notification *Notification
-	Session      *Session
-	Usr          *Usr
+	System  *System
+	Session *Session
 }
 
 func New(
@@ -34,31 +28,22 @@ func New(
 	cache interfaces.Cache,
 	db interfaces.Db,
 	jwts interfaces.Jwts,
-	sms interfaces.Sms,
-	ws interfaces.Ws,
-	noSmsCheck bool,
 	testing bool,
 ) *St {
 	c := &St{
-		lg:         lg,
-		cache:      cache,
-		db:         db,
-		jwts:       jwts,
-		sms:        sms,
-		ws:         ws,
-		noSmsCheck: noSmsCheck,
-		testing:    testing,
+		lg:      lg,
+		cache:   cache,
+		db:      db,
+		jwts:    jwts,
+		testing: testing,
 	}
 
 	c.Config = NewConfig(c)
 
 	c.Dic = NewDic(c)
-	c.UsrType = NewUsrType(c)
 
 	c.System = NewSystem(c)
-	c.Notification = NewNotification(c)
 	c.Session = NewSession(c)
-	c.Usr = NewUsr(c)
 
 	return c
 }

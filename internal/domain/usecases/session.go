@@ -20,21 +20,21 @@ func (u *St) SessionRequireAuth(ses *entities.Session) error {
 	return nil
 }
 
-func (u *St) SessionRequireOneOfTypeIds(ses *entities.Session, strict bool, typeIds ...int) error {
+func (u *St) SessionRequireOneOfRoles(ses *entities.Session, strict bool, roles ...string) error {
 	err := u.SessionRequireAuth(ses)
 	if err != nil {
 		return err
 	}
 
-	if !strict {
-		if ses.TypeId == cns.UsrTypeAdmin {
+	for _, sRole := range ses.Roles {
+		if !strict && sRole == cns.RoleAdmin {
 			return nil
 		}
-	}
 
-	for _, typeId := range typeIds {
-		if typeId == ses.TypeId {
-			return nil
+		for _, pRole := range roles {
+			if pRole == sRole {
+				return nil
+			}
 		}
 	}
 

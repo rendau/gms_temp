@@ -14,7 +14,7 @@ const (
 	ObjectNotFound    = Err("object_not_found")
 	IncorrectPageSize = Err("incorrect_page_size")
 
-	TypeRequired         = Err("type_required")
+	RoleRequired         = Err("role_required")
 	BadType              = Err("bad_type")
 	PhoneRequired        = Err("phone_required")
 	BadPhoneFormat       = Err("bad_phone_format")

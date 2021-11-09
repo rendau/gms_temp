@@ -49,8 +49,6 @@ func (c *Dic) GetJson(ctx context.Context, reqHs string) (string, []byte, error)
 
 	data := &entities.DicDataSt{}
 
-	data.UsrTypes = c.r.UsrType.List()
-
 	data.Config, err = c.r.Config.Get(ctx)
 	if err != nil {
 		return "", nil, err

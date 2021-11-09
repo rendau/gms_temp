@@ -3,6 +3,7 @@ package usecases
 import (
 	"context"
 
+	"github.com/rendau/gms_temp/internal/cns"
 	"github.com/rendau/gms_temp/internal/domain/entities"
 )
 
@@ -12,7 +13,7 @@ func (u *St) ConfigSet(ctx context.Context,
 
 	ses := u.SessionGetFromContext(ctx)
 
-	if err = u.SessionRequireOneOfTypeIds(ses, false); err != nil {
+	if err = u.SessionRequireOneOfRoles(ses, false, cns.RoleAdmin); err != nil {
 		return err
 	}
 

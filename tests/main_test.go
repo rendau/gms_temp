@@ -9,8 +9,6 @@ import (
 	"github.com/rendau/gms_temp/internal/adapters/db/pg"
 	jwtsMock "github.com/rendau/gms_temp/internal/adapters/jwts/mock"
 	"github.com/rendau/gms_temp/internal/adapters/logger/zap"
-	smsMock "github.com/rendau/gms_temp/internal/adapters/sms/mock"
-	wsMock "github.com/rendau/gms_temp/internal/adapters/ws/mock"
 	"github.com/rendau/gms_temp/internal/domain/core"
 	"github.com/rendau/gms_temp/internal/domain/usecases"
 	"github.com/spf13/viper"
@@ -48,18 +46,11 @@ func TestMain(m *testing.M) {
 
 	app.jwts = jwtsMock.New(app.lg, false)
 
-	app.sms = smsMock.New(app.lg, false)
-
-	app.ws = wsMock.New(app.lg, true)
-
 	app.core = core.New(
 		app.lg,
 		app.cache,
 		app.db,
 		app.jwts,
-		app.sms,
-		app.ws,
-		false,
 		true,
 	)
 

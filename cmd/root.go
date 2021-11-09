@@ -14,10 +14,6 @@ import (
 	"github.com/rendau/gms_temp/internal/adapters/jwts/jwts"
 	jwtsMock "github.com/rendau/gms_temp/internal/adapters/jwts/mock"
 	"github.com/rendau/gms_temp/internal/adapters/logger/zap"
-	smsMock "github.com/rendau/gms_temp/internal/adapters/sms/mock"
-	"github.com/rendau/gms_temp/internal/adapters/sms/smsc"
-	"github.com/rendau/gms_temp/internal/adapters/ws/cfugo"
-	wsMock "github.com/rendau/gms_temp/internal/adapters/ws/mock"
 	"github.com/rendau/gms_temp/internal/domain/core"
 	"github.com/rendau/gms_temp/internal/domain/usecases"
 	"github.com/rendau/gms_temp/internal/interfaces"
@@ -36,8 +32,6 @@ func Execute() {
 		cache   interfaces.Cache
 		db      interfaces.Db
 		jwts    interfaces.Jwts
-		sms     interfaces.Sms
-		ws      interfaces.Ws
 		core    *core.St
 		ucs     *usecases.St
 		restApi *rest.St
@@ -78,34 +72,11 @@ func Execute() {
 		)
 	}
 
-	if viper.GetString("MS_SMS_URL") == "" {
-		app.sms = smsMock.New(app.lg, true)
-	} else {
-		app.sms = smsc.New(
-			app.lg,
-			viper.GetString("MS_SMS_URL"),
-		)
-	}
-
-	if viper.GetString("MS_WS_URL") == "" {
-		app.ws = wsMock.New(app.lg, false)
-	} else {
-		app.ws = cfugo.New(
-			app.lg,
-			viper.GetString("MS_WS_URL"),
-			viper.GetString("MS_WS_API_KEY"),
-			viper.GetString("MS_WS_CHANNEL_NS"),
-		)
-	}
-
 	app.core = core.New(
 		app.lg,
 		app.cache,
 		app.db,
 		app.jwts,
-		app.sms,
-		app.ws,
-		debug,
 		false,
 	)
 

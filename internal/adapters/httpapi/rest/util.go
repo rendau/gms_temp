@@ -225,3 +225,28 @@ func (a *St) uQpParseInt64SliceV(values url.Values, key string) []int64 {
 	}
 	return []int64{}
 }
+
+func (a *St) uQpParseStringSlice(values url.Values, key string) *[]string {
+	if _, ok := values[key]; ok {
+		items := strings.Split(values.Get(key), ",")
+
+		result := make([]string, 0, len(items))
+
+		for _, v := range items {
+			if v = strings.TrimSpace(v); v != "" {
+				result = append(result, v)
+			}
+		}
+
+		return &result
+	}
+
+	return nil
+}
+
+func (a *St) uQpParseStringSliceV(values url.Values, key string) []string {
+	if x := a.uQpParseStringSlice(values, key); x != nil {
+		return *x
+	}
+	return []string{}
+}
