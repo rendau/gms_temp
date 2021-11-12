@@ -29,7 +29,6 @@ func Execute() {
 		lg      *zap.St
 		cache   interfaces.Cache
 		db      interfaces.Db
-		jwts    interfaces.Jwts
 		core    *core.St
 		ucs     *usecases.St
 		restApi *rest.St
