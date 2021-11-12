@@ -11,8 +11,6 @@ import (
 	"github.com/rendau/gms_temp/internal/adapters/cache/redis"
 	"github.com/rendau/gms_temp/internal/adapters/db/pg"
 	"github.com/rendau/gms_temp/internal/adapters/httpapi/rest"
-	"github.com/rendau/gms_temp/internal/adapters/jwts/jwts"
-	jwtsMock "github.com/rendau/gms_temp/internal/adapters/jwts/mock"
 	"github.com/rendau/gms_temp/internal/adapters/logger/zap"
 	"github.com/rendau/gms_temp/internal/domain/core"
 	"github.com/rendau/gms_temp/internal/domain/usecases"
@@ -63,20 +61,10 @@ func Execute() {
 		app.db,
 	)
 
-	if viper.GetString("MS_JWTS_URL") == "" {
-		app.jwts = jwtsMock.New(app.lg, false)
-	} else {
-		app.jwts = jwts.New(
-			app.lg,
-			viper.GetString("MS_JWTS_URL"),
-		)
-	}
-
 	app.core = core.New(
 		app.lg,
 		app.cache,
 		app.db,
-		app.jwts,
 		false,
 	)
 

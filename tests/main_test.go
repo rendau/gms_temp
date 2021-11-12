@@ -7,7 +7,6 @@ import (
 
 	"github.com/rendau/gms_temp/internal/adapters/cache/mem"
 	"github.com/rendau/gms_temp/internal/adapters/db/pg"
-	jwtsMock "github.com/rendau/gms_temp/internal/adapters/jwts/mock"
 	"github.com/rendau/gms_temp/internal/adapters/logger/zap"
 	"github.com/rendau/gms_temp/internal/domain/core"
 	"github.com/rendau/gms_temp/internal/domain/usecases"
@@ -44,13 +43,10 @@ func TestMain(m *testing.M) {
 		app.db,
 	)
 
-	app.jwts = jwtsMock.New(app.lg, false)
-
 	app.core = core.New(
 		app.lg,
 		app.cache,
 		app.db,
-		app.jwts,
 		true,
 	)
 

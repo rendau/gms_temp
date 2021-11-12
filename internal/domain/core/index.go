@@ -10,7 +10,6 @@ type St struct {
 	lg      interfaces.Logger
 	cache   interfaces.Cache
 	db      interfaces.Db
-	jwts    interfaces.Jwts
 	testing bool
 
 	wg sync.WaitGroup
@@ -27,14 +26,12 @@ func New(
 	lg interfaces.Logger,
 	cache interfaces.Cache,
 	db interfaces.Db,
-	jwts interfaces.Jwts,
 	testing bool,
 ) *St {
 	c := &St{
 		lg:      lg,
 		cache:   cache,
 		db:      db,
-		jwts:    jwts,
 		testing: testing,
 	}
 

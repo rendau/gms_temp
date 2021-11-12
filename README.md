@@ -11,7 +11,6 @@ REDIS_URL=redis:6379
 REDIS_PSW=psw
 REDIS_DB=0
 PG_DSN=postgres://user:pass@host:5432/dbname?sslmode=disable
-MS_JWTS_URL:http://url/
 MS_SMS_URL=http://url/
 MS_WS_URL=http://url/
 MS_WS_API_KEY=api_key

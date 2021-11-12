@@ -68,15 +68,3 @@ func (c *Session) GetFromContext(ctx context.Context) *entities.Session {
 		return &entities.Session{}
 	}
 }
-
-func (c *Session) CreateToken(ses *entities.Session) (string, error) {
-	token, _ := c.r.jwts.JwtCreate(
-		strconv.FormatInt(ses.Id, 10),
-		sessionDur,
-		map[string]interface{}{
-			"role": ses.Roles,
-		},
-	)
-
-	return token, nil
-}
