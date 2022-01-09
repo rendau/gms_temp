@@ -38,11 +38,6 @@ func TestMain(m *testing.M) {
 		app.lg.Fatal(err)
 	}
 
-	app.ucs = usecases.New(
-		app.lg,
-		app.db,
-	)
-
 	app.core = core.New(
 		app.lg,
 		app.cache,
@@ -50,9 +45,15 @@ func TestMain(m *testing.M) {
 		true,
 	)
 
-	app.ucs.SetCore(app.core)
+	app.ucs = usecases.New(
+		app.lg,
+		app.db,
+		app.core,
+	)
 
 	resetDb()
+
+	app.core.Start()
 
 	// Start tests
 	code := m.Run()
