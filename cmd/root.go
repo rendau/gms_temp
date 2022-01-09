@@ -55,11 +55,6 @@ func Execute() {
 		app.lg.Fatal(err)
 	}
 
-	app.ucs = usecases.New(
-		app.lg,
-		app.db,
-	)
-
 	app.core = core.New(
 		app.lg,
 		app.cache,
@@ -67,7 +62,11 @@ func Execute() {
 		false,
 	)
 
-	app.ucs.SetCore(app.core)
+	app.ucs = usecases.New(
+		app.lg,
+		app.db,
+		app.core,
+	)
 
 	restApiEChan := make(chan error, 1)
 
@@ -81,6 +80,7 @@ func Execute() {
 
 	app.lg.Infow("Starting")
 
+	app.core.Start()
 	app.restApi.Start()
 
 	stopSignalChan := make(chan os.Signal, 1)

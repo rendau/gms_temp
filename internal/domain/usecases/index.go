@@ -15,15 +15,13 @@ type St struct {
 func New(
 	lg interfaces.Logger,
 	db interfaces.Db,
+	cr *core.St,
 ) *St {
 	u := &St{
 		lg: lg,
 		db: db,
+		cr: cr,
 	}
 
 	return u
-}
-
-func (u *St) SetCore(core *core.St) {
-	u.cr = core
 }

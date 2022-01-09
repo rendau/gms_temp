@@ -45,6 +45,9 @@ func New(
 	return c
 }
 
+func (c *St) Start() {
+}
+
 func (c *St) WaitJobs() {
 	c.wg.Wait()
 }
