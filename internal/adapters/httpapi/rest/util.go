@@ -110,6 +110,11 @@ func (a *St) uExtractPaginationPars(dst *entities.PaginationParams, pars url.Val
 			dst.Page = 0
 		}
 	}
+
+	qPar = pars.Get("with_total_count")
+	if qPar != "" {
+		dst.WithTotalCount = true
+	}
 }
 
 func (a *St) uQpParseBool(values url.Values, key string) *bool {

@@ -3,8 +3,9 @@ package entities
 import "time"
 
 type PaginationParams struct {
-	Page     int64 `json:"page"`
-	PageSize int64 `json:"page_size"`
+	Page           int64 `json:"page"`
+	PageSize       int64 `json:"page_size"`
+	WithTotalCount bool  `json:"with_total_count"`
 }
 
 type PeriodFilterPars struct {
