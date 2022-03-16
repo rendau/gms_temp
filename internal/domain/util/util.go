@@ -2,7 +2,6 @@ package util
 
 import (
 	"regexp"
-	"strconv"
 	"strings"
 	"time"
 
@@ -52,7 +51,13 @@ func ValidateEmail(v string) bool {
 	return emailRegexp.MatchString(v)
 }
 
-func CoalesceInt64(v *int64, nv int64) int64 {
+func TimeInAppLocation(v *time.Time) {
+	if v != nil {
+		*v = (*v).In(cns.AppTimeLocation)
+	}
+}
+
+func Coalesce[T any](v *T, nv T) T {
 	if v == nil {
 		return nv
 	}
@@ -60,66 +65,17 @@ func CoalesceInt64(v *int64, nv int64) int64 {
 	return *v
 }
 
-func TimeInAppLocation(v *time.Time) {
-	if v != nil {
-		*v = (*v).In(cns.AppTimeLocation)
-	}
-}
-
-func NewInt(v int) *int {
+func NewVar[T any](v T) *T {
 	return &v
 }
 
-func NewInt64(v int64) *int64 {
-	return &v
-}
-
-func NewFloat64(v float64) *float64 {
-	return &v
-}
-
-func NewString(v string) *string {
-	return &v
-}
-
-func NewBool(v bool) *bool {
-	return &v
-}
-
-func NewTime(v time.Time) *time.Time {
-	return &v
-}
-
-func NewSliceInt64(v ...int64) *[]int64 {
-	res := make([]int64, 0, len(v))
+func NewSliceVar[T any](v ...T) *[]T {
+	res := make([]T, 0, len(v))
 	res = append(res, v...)
 	return &res
 }
 
-func NewSliceString(v ...string) *[]string {
-	res := make([]string, 0, len(v))
-	res = append(res, v...)
-	return &res
-}
-
-func Int64SliceToString(src []int64, delimiter, emptyV string) string {
-	if len(src) == 0 {
-		return emptyV
-	}
-
-	res := ""
-
-	for _, v := range src {
-		if res != "" {
-			res += delimiter
-		}
-		res += strconv.FormatInt(v, 10)
-	}
-
-	return res
-}
-
-func Int64SliceHasValue(sl []int64, v int64) bool {
+func SliceHasValue[T comparable](sl []T, v T) bool {
 	for _, x := range sl {
 		if x == v {
 			return true
@@ -129,15 +85,15 @@ func Int64SliceHasValue(sl []int64, v int64) bool {
 	return false
 }
 
-func Int64SlicesAreSame(a, b []int64) bool {
+func SlicesAreSame[T comparable](a, b []T) bool {
 	for _, x := range a {
-		if !Int64SliceHasValue(b, x) {
+		if !SliceHasValue(b, x) {
 			return false
 		}
 	}
 
 	for _, x := range b {
-		if !Int64SliceHasValue(a, x) {
+		if !SliceHasValue(a, x) {
 			return false
 		}
 	}
@@ -145,15 +101,15 @@ func Int64SlicesAreSame(a, b []int64) bool {
 	return true
 }
 
-func Int64SlicesIntersection(sl1, sl2 []int64) []int64 {
-	result := make([]int64, 0)
+func SlicesIntersection[T comparable](sl1, sl2 []T) []T {
+	result := make([]T, 0)
 
 	if len(sl1) == 0 || len(sl2) == 0 {
 		return result
 	}
 
 	for _, x := range sl1 {
-		if Int64SliceHasValue(sl2, x) {
+		if SliceHasValue(sl2, x) {
 			result = append(result, x)
 		}
 	}
@@ -161,11 +117,11 @@ func Int64SlicesIntersection(sl1, sl2 []int64) []int64 {
 	return result
 }
 
-func Int64SliceExcludeValues(sl, vs []int64) []int64 {
-	result := make([]int64, 0, len(sl))
+func SliceExcludeValues[T comparable](sl, vs []T) []T {
+	result := make([]T, 0, len(sl))
 
 	for _, x := range sl {
-		if !Int64SliceHasValue(vs, x) {
+		if !SliceHasValue(vs, x) {
 			result = append(result, x)
 		}
 	}
