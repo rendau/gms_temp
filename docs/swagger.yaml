@@ -1,0 +1,70 @@
+definitions:
+  dopTypes.ErrRep:
+    properties:
+      desc:
+        type: string
+      error_code:
+        type: string
+      fields:
+        additionalProperties:
+          type: string
+        type: object
+    type: object
+  entities.ConfigContactsSt:
+    properties:
+      email:
+        type: string
+      phone:
+        type: string
+    type: object
+  entities.ConfigSt:
+    properties:
+      contacts:
+        $ref: '#/definitions/entities.ConfigContactsSt'
+    type: object
+  entities.DicSt:
+    properties:
+      config:
+        $ref: '#/definitions/entities.ConfigSt'
+    type: object
+info:
+  contact: {}
+paths:
+  /config:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: body
+        in: body
+        name: body
+        schema:
+          $ref: '#/definitions/entities.ConfigSt'
+      responses:
+        "200":
+          description: ""
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dopTypes.ErrRep'
+      summary: Update configs
+      tags:
+      - config
+  /dic:
+    get:
+      description: Get all dictionaries
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entities.DicSt'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dopTypes.ErrRep'
+      summary: dictionaries
+      tags:
+      - dic
+swagger: "2.0"
