@@ -3,9 +3,9 @@ package usecases
 import (
 	"context"
 
+	"github.com/rendau/dop/dopErrs"
 	"github.com/rendau/gms_temp/internal/cns"
 	"github.com/rendau/gms_temp/internal/domain/entities"
-	"github.com/rendau/gms_temp/internal/domain/errs"
 )
 
 func (u *St) SessionGetFromToken(token string) *entities.Session {
@@ -14,7 +14,7 @@ func (u *St) SessionGetFromToken(token string) *entities.Session {
 
 func (u *St) SessionRequireAuth(ses *entities.Session) error {
 	if ses.Id == 0 {
-		return errs.NotAuthorized
+		return dopErrs.NotAuthorized
 	}
 
 	return nil
@@ -38,7 +38,7 @@ func (u *St) SessionRequireOneOfRoles(ses *entities.Session, strict bool, roles 
 		}
 	}
 
-	return errs.PermissionDenied
+	return dopErrs.PermissionDenied
 }
 
 func (u *St) SessionSetToContext(ctx context.Context, ses *entities.Session) context.Context {

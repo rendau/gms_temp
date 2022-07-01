@@ -15,16 +15,9 @@ func NewConfig(r *St) *Config {
 }
 
 func (c *Config) Get(ctx context.Context) (*entities.ConfigSt, error) {
-	return c.r.db.ConfigGet(ctx)
+	return c.r.repo.ConfigGet(ctx)
 }
 
 func (c *Config) Set(ctx context.Context, config *entities.ConfigSt) error {
-	err := c.r.db.ConfigSet(ctx, config)
-	if err != nil {
-		return err
-	}
-
-	c.r.Dic.Refresh()
-
-	return nil
+	return c.r.repo.ConfigSet(ctx, config)
 }

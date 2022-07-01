@@ -18,7 +18,7 @@ func truncateTables(tables []string) {
 		q += ` truncate ` + t + ` restart identity cascade; `
 	}
 	if q != `` {
-		_, err := app.db.DbExec(context.Background(), `begin; `+q+` commit;`)
+		err := app.repo.DbExec(context.Background(), `begin; `+q+` commit;`)
 		if err != nil {
 			app.lg.Fatal(err)
 		}

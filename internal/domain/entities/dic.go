@@ -1,5 +1,5 @@
 package entities
 
-type DicDataSt struct {
+type DicSt struct {
 	Config *ConfigSt `json:"config"`
 }

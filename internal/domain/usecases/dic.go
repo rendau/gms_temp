@@ -2,9 +2,10 @@ package usecases
 
 import (
 	"context"
+
+	"github.com/rendau/gms_temp/internal/domain/entities"
 )
 
-func (u *St) DicGetJson(ctx context.Context,
-	reqHs string) (string, []byte, error) {
-	return u.cr.Dic.GetJson(ctx, reqHs)
+func (u *St) DicGet(ctx context.Context) (*entities.DicSt, error) {
+	return u.cr.Dic.Get(ctx)
 }

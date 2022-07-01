@@ -9,13 +9,13 @@ func NewSystem(r *St) *System {
 }
 
 func (c *System) CronTick5m() {
-	// do something in goroutine
+	// do something
 }
 
 func (c *System) CronTick15m() {
-	// do something in goroutine
+	// do something
 }
 
 func (c *System) CronTick30m() {
-	// do something in goroutine
+	// do something
 }

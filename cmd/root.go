@@ -1,104 +1,106 @@
 package cmd
 
 import (
-	"log"
 	"os"
-	"os/signal"
-	"syscall"
 	"time"
 
-	memCache "github.com/rendau/gms_temp/internal/adapters/cache/mem"
-	"github.com/rendau/gms_temp/internal/adapters/cache/redis"
-	"github.com/rendau/gms_temp/internal/adapters/db/pg"
-	"github.com/rendau/gms_temp/internal/adapters/httpapi/rest"
-	"github.com/rendau/gms_temp/internal/adapters/logger/zap"
+	dopCache "github.com/rendau/dop/adapters/cache"
+	dopCacheMem "github.com/rendau/dop/adapters/cache/mem"
+	dopCacheRedis "github.com/rendau/dop/adapters/cache/redis"
+	dopDbPg "github.com/rendau/dop/adapters/db/pg"
+	dopLoggerZap "github.com/rendau/dop/adapters/logger/zap"
+	dopServerHttps "github.com/rendau/dop/adapters/server/https"
+	"github.com/rendau/dop/dopTools"
+	"github.com/rendau/gms_temp/docs"
+	"github.com/rendau/gms_temp/internal/adapters/repo/pg"
+	"github.com/rendau/gms_temp/internal/adapters/server/rest"
 	"github.com/rendau/gms_temp/internal/domain/core"
 	"github.com/rendau/gms_temp/internal/domain/usecases"
-	"github.com/rendau/gms_temp/internal/interfaces"
-	"github.com/spf13/viper"
 )
 
 func Execute() {
 	var err error
 
-	loadConf()
-
-	debug := viper.GetBool("DEBUG")
-
 	app := struct {
-		lg      *zap.St
-		cache   interfaces.Cache
-		db      interfaces.Db
-		core    *core.St
-		ucs     *usecases.St
-		restApi *rest.St
+		lg         *dopLoggerZap.St
+		cache      dopCache.Cache
+		db         *dopDbPg.St
+		repo       *pg.St
+		core       *core.St
+		ucs        *usecases.St
+		restApi    *rest.St
+		restApiSrv *dopServerHttps.St
 	}{}
 
-	app.lg, err = zap.New(viper.GetString("LOG_LEVEL"), debug, false)
-	if err != nil {
-		log.Fatal(err)
-	}
+	confLoad()
 
-	if viper.GetString("REDIS_URL") == "" {
-		app.cache = memCache.New()
+	app.lg = dopLoggerZap.New(conf.LogLevel, conf.Debug)
+
+	if conf.RedisUrl == "" {
+		app.cache = dopCacheMem.New()
 	} else {
-		app.cache = redis.New(
+		app.cache = dopCacheRedis.New(
 			app.lg,
-			viper.GetString("REDIS_URL"),
-			viper.GetString("REDIS_PSW"),
-			viper.GetInt("REDIS_DB"),
+			conf.RedisUrl,
+			conf.RedisPsw,
+			conf.RedisDb,
+			conf.RedisKeyPrefix,
 		)
 	}
 
-	app.db, err = pg.New(app.lg, viper.GetString("PG_DSN"), debug)
+	app.db, err = dopDbPg.New(conf.Debug, app.lg, dopDbPg.OptionsSt{
+		Dsn: conf.PgDsn,
+	})
 	if err != nil {
 		app.lg.Fatal(err)
 	}
+
+	app.repo = pg.New(app.db, app.lg)
+
+	app.ucs = usecases.New(app.lg, app.db)
 
 	app.core = core.New(
 		app.lg,
 		app.cache,
 		app.db,
+		app.repo,
 		false,
 	)
 
-	app.ucs = usecases.New(
-		app.lg,
-		app.db,
-		app.core,
-	)
+	app.ucs.SetCore(app.core)
 
-	restApiEChan := make(chan error, 1)
+	docs.SwaggerInfo.Host = conf.SwagHost
+	docs.SwaggerInfo.BasePath = conf.SwagBasePath
+	docs.SwaggerInfo.Schemes = []string{conf.SwagSchema}
+	docs.SwaggerInfo.Title = "Stg service"
 
-	app.restApi = rest.New(
-		app.lg,
-		viper.GetString("HTTP_LISTEN"),
-		app.ucs,
-		restApiEChan,
-		viper.GetBool("HTTP_CORS"),
-	)
+	// START
 
 	app.lg.Infow("Starting")
 
-	app.core.Start()
-	app.restApi.Start()
-
-	stopSignalChan := make(chan os.Signal, 1)
-	signal.Notify(stopSignalChan, os.Interrupt, syscall.SIGTERM, syscall.SIGINT)
+	app.restApiSrv = dopServerHttps.Start(
+		conf.HttpListen,
+		rest.GetHandler(
+			app.lg,
+			app.ucs,
+			conf.HttpCors,
+		),
+		app.lg,
+	)
 
 	var exitCode int
 
 	select {
-	case <-stopSignalChan:
-	case <-restApiEChan:
+	case <-dopTools.StopSignal():
+	case <-app.restApiSrv.Wait():
 		exitCode = 1
 	}
 
+	// STOP
+
 	app.lg.Infow("Shutting down...")
 
-	err = app.restApi.Shutdown(20 * time.Second)
-	if err != nil {
-		app.lg.Errorw("Fail to shutdown http-api", err)
+	if !app.restApiSrv.Shutdown(20 * time.Second) {
 		exitCode = 1
 	}
 
@@ -109,19 +111,4 @@ func Execute() {
 	app.lg.Infow("Exit")
 
 	os.Exit(exitCode)
-}
-
-func loadConf() {
-	viper.SetDefault("debug", "false")
-	viper.SetDefault("http_listen", ":80")
-	viper.SetDefault("log_level", "info")
-
-	confFilePath := os.Getenv("CONF_PATH")
-	if confFilePath == "" {
-		confFilePath = "conf.yml"
-	}
-	viper.SetConfigFile(confFilePath)
-	_ = viper.ReadInConfig()
-
-	viper.AutomaticEnv()
 }

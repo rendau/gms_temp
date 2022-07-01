@@ -17,21 +17,9 @@ func (u *St) ConfigSet(ctx context.Context,
 		return err
 	}
 
-	if ctx, err = u.db.ContextWithTransaction(ctx); err != nil {
-		return err
-	}
-	defer func() { u.db.RollbackContextTransaction(ctx) }()
-
-	err = u.cr.Config.Set(ctx, config)
-	if err != nil {
-		return err
-	}
-
-	if err = u.db.CommitContextTransaction(ctx); err != nil {
-		return err
-	}
-
-	return nil
+	return u.db.TransactionFn(ctx, func(ctx context.Context) error {
+		return u.cr.Config.Set(ctx, config)
+	})
 }
 
 func (u *St) ConfigGet(ctx context.Context) (*entities.ConfigSt, error) {

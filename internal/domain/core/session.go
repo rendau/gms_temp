@@ -2,17 +2,13 @@ package core
 
 import (
 	"context"
-	"encoding/base64"
-	"encoding/json"
 	"strconv"
-	"strings"
-	"time"
 
+	"github.com/rendau/dop/adapters/jwt"
 	"github.com/rendau/gms_temp/internal/domain/entities"
 )
 
 const sessionContextKey = "user_session"
-const sessionDur = int64(600 * time.Second)
 
 type Session struct {
 	r *St
@@ -23,24 +19,16 @@ func NewSession(r *St) *Session {
 }
 
 func (c *Session) GetFromToken(token string) *entities.Session {
-	tokenParts := strings.Split(token, ".")
-	if len(tokenParts) == 3 {
-		if claimsRaw, err := base64.RawURLEncoding.DecodeString(tokenParts[1]); err == nil {
-			claims := entities.JwtClaimsSt{}
+	var session entities.Session
 
-			err = json.Unmarshal(claimsRaw, &claims)
-			if err != nil {
-				claims = entities.JwtClaimsSt{}
-			}
+	if jwt.ParsePayload(token, &session) != nil {
+		session = entities.Session{}
+	}
 
-			claims.Id, _ = strconv.ParseInt(claims.Sub, 10, 64)
+	session.Id, _ = strconv.ParseInt(session.Sub, 10, 64)
 
-			if claims.Roles == nil {
-				claims.Roles = make([]string, 0)
-			}
-
-			return &claims.Session
-		}
+	if session.Roles == nil {
+		session.Roles = make([]string, 0)
 	}
 
 	return &entities.Session{}
@@ -64,7 +52,7 @@ func (c *Session) GetFromContext(ctx context.Context) *entities.Session {
 	case *entities.Session:
 		return ses
 	default:
-		c.r.lg.Fatal("wrong type of session in context")
+		c.r.lg.Errorw("wrong type of session in context", nil)
 		return &entities.Session{}
 	}
 }

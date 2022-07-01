@@ -3,6 +3,8 @@
 *.tar.gz
 *.tar.bz2
 .idea
+go.work
+go.work.sum
 release/*
 build/
 conf.yml

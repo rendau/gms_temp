@@ -1,27 +1,27 @@
 package usecases
 
 import (
+	"github.com/rendau/dop/adapters/db"
+	"github.com/rendau/dop/adapters/logger"
 	"github.com/rendau/gms_temp/internal/domain/core"
-	"github.com/rendau/gms_temp/internal/interfaces"
 )
 
 type St struct {
-	lg interfaces.Logger
-
-	db interfaces.Db
+	lg logger.Lite
+	db db.RDBContextTransaction
 	cr *core.St
 }
 
 func New(
-	lg interfaces.Logger,
-	db interfaces.Db,
-	cr *core.St,
+	lg logger.Lite,
+	db db.RDBContextTransaction,
 ) *St {
-	u := &St{
+	return &St{
 		lg: lg,
 		db: db,
-		cr: cr,
 	}
+}
 
-	return u
+func (u *St) SetCore(core *core.St) {
+	u.cr = core
 }
