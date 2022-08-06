@@ -31,7 +31,7 @@ func (c *Session) GetFromToken(token string) *entities.Session {
 		session.Roles = make([]string, 0)
 	}
 
-	return &entities.Session{}
+	return &session
 }
 
 func (c *Session) SetToContext(ctx context.Context, ses *entities.Session) context.Context {
