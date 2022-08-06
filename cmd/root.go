@@ -72,7 +72,7 @@ func Execute() {
 	docs.SwaggerInfo.Host = conf.SwagHost
 	docs.SwaggerInfo.BasePath = conf.SwagBasePath
 	docs.SwaggerInfo.Schemes = []string{conf.SwagSchema}
-	docs.SwaggerInfo.Title = "Stg service"
+	docs.SwaggerInfo.Title = "GmsTemp service"
 
 	// START
 
