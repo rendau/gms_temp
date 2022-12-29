@@ -23,14 +23,26 @@ definitions:
         $ref: '#/definitions/entities.ConfigContactsSt'
     type: object
   entities.DicSt:
-    properties:
-      config:
-        $ref: '#/definitions/entities.ConfigSt'
     type: object
 info:
   contact: {}
 paths:
   /config:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entities.ConfigSt'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dopTypes.ErrRep'
+      summary: Get configs
+      tags:
+      - config
     put:
       consumes:
       - application/json
@@ -42,7 +54,7 @@ paths:
           $ref: '#/definitions/entities.ConfigSt'
       responses:
         "200":
-          description: ""
+          description: OK
         "400":
           description: Bad Request
           schema:

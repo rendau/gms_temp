@@ -15,14 +15,9 @@ func NewDic(r *St) *Dic {
 }
 
 func (c *Dic) Get(ctx context.Context) (*entities.DicSt, error) {
-	var err error
+	// var err error
 
 	data := &entities.DicSt{}
-
-	data.Config, err = c.r.Config.Get(ctx)
-	if err != nil {
-		return nil, err
-	}
 
 	return data, nil
 }

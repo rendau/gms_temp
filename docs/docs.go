@@ -17,6 +17,29 @@ const docTemplate = `{
     "basePath": "{{.BasePath}}",
     "paths": {
         "/config": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "config"
+                ],
+                "summary": "Get configs",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/entities.ConfigSt"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dopTypes.ErrRep"
+                        }
+                    }
+                }
+            },
             "put": {
                 "consumes": [
                     "application/json"
@@ -37,7 +60,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": ""
+                        "description": "OK"
                     },
                     "400": {
                         "description": "Bad Request",
@@ -113,12 +136,7 @@ const docTemplate = `{
             }
         },
         "entities.DicSt": {
-            "type": "object",
-            "properties": {
-                "config": {
-                    "$ref": "#/definitions/entities.ConfigSt"
-                }
-            }
+            "type": "object"
         }
     }
 }`
