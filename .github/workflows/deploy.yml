@@ -2,7 +2,7 @@ name: Deploy
 on:
   push:
     branches:
-      - master
+      - disable
 jobs:
   build:
     name: Build and deploy
@@ -30,3 +30,6 @@ jobs:
       - run: docker build -t ghcr.io/$OWNER/$IMAGE:latest .
 
       - run: docker push ghcr.io/$OWNER/$IMAGE:latest
+
+#      - name: Deploy
+#        run: curl -f -k -X POST https://webhook-url
