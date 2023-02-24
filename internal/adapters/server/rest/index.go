@@ -51,8 +51,8 @@ func GetHandler(lg logger.Lite, ucs *usecases.St, withCors bool) http.Handler {
 	r.GET("/dic", s.hDicGet)
 
 	// config
-	r.PUT("/config", s.hConfigUpdate)
 	r.GET("/config", s.hConfigGet)
+	r.PUT("/config", s.hConfigUpdate)
 
 	return r
 }
