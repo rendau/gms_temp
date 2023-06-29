@@ -3,9 +3,6 @@ package cns
 import "time"
 
 const (
-	AppName = "GmsTemp"
-	AppUrl  = "https://gmstemp.com"
-
 	MaxPageSize = 1000
 )
 

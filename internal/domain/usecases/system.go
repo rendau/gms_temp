@@ -1,13 +1,17 @@
 package usecases
 
-func (u *St) SystemCronTick5m() {
-	u.cr.System.CronTick5m()
+import (
+	"time"
+)
+
+func (u *St) SystemCronTick5m(t time.Time) {
+	u.cr.System.CronTick5m(t)
 }
 
-func (u *St) SystemCronTick15m() {
-	u.cr.System.CronTick15m()
+func (u *St) SystemCronTick15m(t time.Time) {
+	u.cr.System.CronTick15m(t)
 }
 
-func (u *St) SystemCronTick30m() {
-	u.cr.System.CronTick30m()
+func (u *St) SystemCronTick30m(t time.Time) {
+	u.cr.System.CronTick30m(t)
 }

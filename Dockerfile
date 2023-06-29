@@ -6,6 +6,6 @@ WORKDIR /app
 
 COPY ./cmd/build/. ./
 
-HEALTHCHECK --start-period=4s --interval=10s --timeout=2s --retries=3 CMD curl -f http://localhost/healthcheck || false
+HEALTHCHECK --start-period=7s --interval=10s --timeout=3s --retries=3 CMD curl -f http://localhost/healthcheck || false
 
 CMD ["./svc"]

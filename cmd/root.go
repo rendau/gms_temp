@@ -88,6 +88,10 @@ func Execute() {
 		app.lg,
 	)
 
+	app.core.Start()
+
+	// LISTEN
+
 	var exitCode int
 
 	select {
@@ -106,7 +110,7 @@ func Execute() {
 
 	app.lg.Infow("Wait routines...")
 
-	app.core.WaitJobs()
+	app.core.StopAndWaitJobs()
 
 	app.lg.Infow("Exit")
 

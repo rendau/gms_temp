@@ -1,6 +1,7 @@
 package core
 
 import (
+	"context"
 	"sync"
 
 	"github.com/rendau/dop/adapters/cache"
@@ -16,7 +17,9 @@ type St struct {
 	repo    repo.Repo
 	testing bool
 
-	wg sync.WaitGroup
+	wg           sync.WaitGroup
+	jobCtx       context.Context
+	jobCtxCancel context.CancelFunc
 
 	Config  *Config
 	Dic     *Dic
@@ -31,12 +34,16 @@ func New(
 	repo repo.Repo,
 	testing bool,
 ) *St {
+	jobCtx, jobCtxCancel := context.WithCancel(context.Background())
+
 	c := &St{
-		lg:      lg,
-		cache:   cache,
-		db:      db,
-		repo:    repo,
-		testing: testing,
+		lg:           lg,
+		cache:        cache,
+		db:           db,
+		repo:         repo,
+		testing:      testing,
+		jobCtx:       jobCtx,
+		jobCtxCancel: jobCtxCancel,
 	}
 
 	c.Config = NewConfig(c)
@@ -47,6 +54,14 @@ func New(
 	return c
 }
 
-func (c *St) WaitJobs() {
+func (c *St) Start() {
+}
+
+func (c *St) IsStopped() bool {
+	return c.jobCtx.Err() != nil
+}
+
+func (c *St) StopAndWaitJobs() {
+	c.jobCtxCancel()
 	c.wg.Wait()
 }
