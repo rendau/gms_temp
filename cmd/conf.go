@@ -29,7 +29,7 @@ func confLoad() {
 	viper.SetDefault("SWAG_HOST", "example.com")
 	viper.SetDefault("SWAG_BASE_PATH", "/")
 	viper.SetDefault("SWAG_SCHEMA", "https")
-	viper.SetDefault("REDIS_KEY_PREFIX", "stg_")
+	viper.SetDefault("REDIS_KEY_PREFIX", "gms_temp_")
 
 	viper.SetConfigFile("conf.yml")
 	_ = viper.ReadInConfig()
